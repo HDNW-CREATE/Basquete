@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0e1633">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CUBOLA — Estrela das Quadras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<!-- ===== Palco: canvas 3D + camada de toque + interface HTML ===== -->
+<div id="stage">
+  <canvas id="gl"></canvas>
+  <div id="touch"><div id="stick"><div id="knob"></div></div></div>
+
+  <div id="ui">
+    <!-- barra superior: nível/XP, gemas, moedas, energia, ajustes -->
+    <div id="top" class="hidden">
+      <div class="chip lvl"><b id="t-lvl">1</b><div class="bar"><i id="t-xpbar"></i><span id="t-xp">0/200</span></div></div>
+      <div class="chip"><span class="ic">💎</span><span id="t-gems">0</span></div>
+      <div class="chip"><span class="ic">🪙</span><span id="t-coins">0</span></div>
+      <div class="chip en"><span class="ic">⚡</span><span id="t-en">10/10</span></div>
+      <button class="sq" id="t-set" aria-label="Ajustes">⚙️</button>
+    </div>
+
+    <section id="home" class="hidden"></section>
+    <section id="panel" class="hidden"><div id="panel-in"></div></section>
+    <section id="pre" class="hidden"></section>
+
+    <!-- HUD da partida e dos treinos -->
+    <section id="hud" class="hidden">
+      <div id="sb">
+        <div class="ln"><span class="tm" id="sb-a">AAA</span><span id="sb-sc" class="out">0 : 0</span><span class="tm" id="sb-b">BBB</span></div>
+        <div class="inf"><span id="sb-q">1º</span><span id="sb-clk">2:00</span><span id="sb-sh">24</span></div>
+        <div class="fl" id="sb-f"></div>
+      </div>
+      <div id="mystats"></div>
+      <div id="goals"></div>
+      <button class="sq" id="btn-pause" aria-label="Pausar">⏸</button>
+      <div id="trainbar" class="hidden"><b id="tr-score">0</b><span id="tr-msg"></span><button class="sq" id="tr-quit">✕</button></div>
+      <div id="joyhint">Arraste aqui<br>para mover</div>
+      <div id="hint" class="out"></div>
+      <div id="aimlbl" class="out hidden"></div>
+      <button class="act y s1" id="b-shoot"><i>🏀</i>ARREMESSAR</button>
+      <button class="act s2" id="b-pass"><i>🤝</i><span>PASSAR</span></button>
+      <button class="act s3" id="b-drib"><i>⚡</i><span>DRIBLAR</span></button>
+      <button class="act o s4" id="b-lay"><i>💥</i><span>ENTERRAR</span></button>
+      <button class="act s2" id="b-steal"><i>🖐️</i>ROUBAR</button>
+      <button class="act y s1" id="b-jump"><i>🚫</i><span>BLOQUEAR</span></button>
+      <button class="btn g hidden" id="btn-rew">⏪ RETROCEDER</button>
+      <div id="replay" class="hidden">● REPLAY</div>
+      <button id="skiprep" class="hidden" aria-label="Pular replay"></button>
+      <div id="ftui" class="hidden">
+        <div class="t out" id="ft-t">LANCE LIVRE</div>
+        <div class="hbar" id="ft-aim"><div class="z"></div><div class="m"></div></div>
+        <div class="vbar" id="ft-pow"><div class="z"></div><div class="m"></div></div>
+        <div class="tip out" id="ft-tip">Toque para travar a MIRA</div>
+      </div>
+    </section>
+
+    <section id="result" class="hidden"></section>
+    <nav id="nav" class="hidden">
+      <button class="nav" data-tab="shop"><i>🛍️</i><span>Loja</span></button>
+      <button class="nav" data-tab="league"><i>🏆</i><span>Partidas</span></button>
+      <button class="nav" data-tab="home"><i>🏀</i><span>Início</span></button>
+      <button class="nav" data-tab="events"><i>📅</i><span>Eventos</span></button>
+      <button class="nav" data-tab="life"><i>🏠</i><span>Vida</span></button>
+    </nav>
+
+    <div id="banner"></div>
+    <div id="floats"></div>
+    <div id="modal" class="hidden"><div class="box"><button class="sq x" id="m-x">✕</button><h2 id="m-t" class="out"></h2><div class="body" id="m-b"></div></div></div>
+    <div id="toast"></div>
+
+    <!-- abertura com o logo original do jogo -->
+    <div id="splash">
+      <div class="logo">
+        <div class="cube"><i></i></div>
+        <h1 class="out">CUBOLA</h1>
+        <p class="out">ESTRELA DAS QUADRAS</p>
+      </div>
+      <div class="tap out">Toque para jogar</div>
+    </div>
+  </div>
+</div>
+
+<!-- Three.js (WebGL) via CDN, com endereço alternativo -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>window.THREE || document.write('<script src="https://unpkg.com/three@0.160.0/build/three.min.js"><\/script>');</script>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
