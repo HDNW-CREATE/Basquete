@@ -7,21 +7,25 @@
 const HUD = (() => {
   const $ = U.$, el = {}, cache = {};
   let toastT = 0, aimOn = false, joyUsed = false;
-  const ft = { on: false, stage: 0, t: 0, aim: 0, pow: 0 };
+  const ft = { on: false, t: 0, down: false, u: 0, v: 0, cx: 0, cy: 0, R: 1, tx: 0, ty: 0 };
   const set = (id, v) => { if (cache[id] !== v) { cache[id] = v; el[id].textContent = v; } };
   const vis = (id, on) => { const k = 'v_' + id; if (cache[k] !== on) { cache[k] = on; el[id].classList.toggle('hidden', !on); } };
   const cls = (id, c) => { const k = 'c_' + id; if (cache[k] !== c) { cache[k] = c; el[id].className = c; } };
 
   function init() {
     ['sb', 'sb-a', 'sb-b', 'sb-sc', 'sb-q', 'sb-clk', 'sb-sh', 'sb-f', 'mystats', 'goals', 'hint', 'aimlbl', 'b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump',
-      'btn-rew', 'replay', 'skiprep', 'ftui', 'ft-t', 'ft-aim', 'ft-pow', 'ft-tip', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
+      'btn-rew', 'replay', 'skiprep', 'ftui', 'ft-t', 'ft-ring', 'ft-dot', 'ft-tip', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
     const press = (id, fn) => el[id].addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); fn(e); });
     press('b-shoot', (e) => Input.aimFromButton(e));
     press('b-pass', () => Match.act('pass')); press('b-drib', () => Match.act('dribble')); press('b-lay', () => Match.act('layup'));
     press('b-steal', () => Match.act('steal')); press('b-jump', () => Match.act('jump'));
     press('btn-rew', () => Match.rewind()); press('skiprep', () => Match.endReplay());
     press('btn-pause', () => UI.pauseMenu()); press('tr-quit', () => Game.quitTraining());
-    press('ftui', ftTap);
+    // lance livre: tocar/arrastar sobre a bola mira; soltar arremessa
+    el.ftui.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); if (!ft.on) return; ft.down = true; ftPoint(e); try { el.ftui.setPointerCapture(e.pointerId); } catch (x) { /* sem captura */ } });
+    el.ftui.addEventListener('pointermove', (e) => { if (ft.down) ftPoint(e); });
+    el.ftui.addEventListener('pointerup', ftRelease);
+    el.ftui.addEventListener('pointercancel', () => { ft.down = false; });
   }
 
   /* ----- avisos ----- */
@@ -59,27 +63,37 @@ const HUD = (() => {
 
   /* ----- lance livre: duas barras (mira e força) ----- */
   function ftShow(on, i, n) {
-    if (!on) { if (ft.on) { ft.on = false; vis('ftui', false); } return; }
-    ft.on = true; ft.stage = 0; ft.t = Math.random() * 3; vis('ftui', true);
-    el['ft-t'].textContent = `LANCE LIVRE ${i}/${n}`; el['ft-tip'].textContent = 'Toque para travar a MIRA';
-    const gz = ftZone() * 50;
-    el['ft-aim'].firstElementChild.style.cssText = `left:${50 - gz}%;width:${gz * 2}%`;
-    el['ft-pow'].firstElementChild.style.cssText = `top:${50 - gz}%;height:${gz * 2}%`;
-    el['ft-pow'].classList.add('dim'); el['ft-aim'].classList.remove('dim');
+    if (!on) { if (ft.on) { ft.on = false; ft.down = false; vis('ftui', false); GFX.traj([]); } return; }
+    ft.on = true; ft.down = false; ft.t = Math.random() * 9; vis('ftui', true);
+    el['ft-t'].textContent = `LANCE LIVRE ${i}/${n}`;
+    el['ft-ring'].style.display = 'none'; el['ft-dot'].style.display = 'none';
   }
-  function ftTap() {
-    if (!ft.on) return;
-    SND.play('click');
-    if (ft.stage === 0) { ft.stage = 1; ft.t = Math.random() * 2; el['ft-tip'].textContent = 'Toque para travar a FORÇA'; el['ft-pow'].classList.remove('dim'); }
-    else if (ft.stage === 1) { ft.stage = 2; if (Game.mode === 'match') Match.ftInput(ft.aim, ft.pow); else Train.ftInput(ft.aim, ft.pow); }
+  const ftSrc = () => (Game.mode === 'match' ? Match.ftBall() : Train.ftBall());
+  // converte o toque em coordenadas da bola: (0,0) = centro, raio = 1, v positivo = para cima
+  function ftPoint(e) { const r = el.hud.getBoundingClientRect(); ft.u = (e.clientX - r.left - ft.cx) / ft.R; ft.v = -(e.clientY - r.top - ft.cy) / ft.R; }
+  function ftRelease(e) {
+    if (!ft.on || !ft.down) return; ft.down = false; ftPoint(e);
+    if (!ftSrc() || Math.hypot(ft.u, ft.v) > 1.1) return;                  // soltou fora da bola: cancela
+    const du = ft.u - ft.tx, dv = ft.v - ft.ty;
+    if (Game.mode === 'match') Match.ftInput(du, dv); else Train.ftInput(du, dv);
   }
   function ftUpdate(dt) {
     if (!ft.on) return;
-    ft.t += dt;
-    if (ft.stage === 0) ft.aim = Math.sin(ft.t * 3.3);
-    if (ft.stage === 1) { const u = (ft.t * 0.95) % 2; ft.pow = u < 1 ? u * 2 - 1 : 3 - u * 2; }
-    el['ft-aim'].lastElementChild.style.left = 50 + ft.aim * 50 + '%';
-    el['ft-pow'].lastElementChild.style.top = 50 - ft.pow * 50 + '%';
+    const b = ftSrc(), ring = el['ft-ring'], dot = el['ft-dot'];
+    if (!b) { ring.style.display = dot.style.display = 'none'; return; }
+    // o alvo verde passeia pela bola (mais devagar conforme o nível de treino)
+    ft.t += dt * Math.max(0.75, 1.25 - S.training.level * 0.025);
+    ft.tx = 0.42 * Math.sin(ft.t * 1.7); ft.ty = -0.08 + 0.36 * Math.sin(ft.t * 2.3 + 1);
+    const c = GFX.project(b.x, b.y, b.z), e = GFX.project(b.x + CT.BALL_R, b.y, b.z);
+    ft.cx = c.x; ft.cy = c.y; ft.R = Math.max(8, Math.abs(e.x - c.x));
+    ring.style.cssText = `display:block;left:${ft.cx + ft.tx * ft.R}px;top:${ft.cy - ft.ty * ft.R}px;width:${b.rz * 2 * ft.R}px;height:${b.rz * 2 * ft.R}px`;
+    const on = ft.down && Math.hypot(ft.u, ft.v) <= 1.1;
+    if (!on) { dot.style.display = 'none'; GFX.traj([]); set('ft-tip', 'Toque na bola em cima do alvo verde'); return; }
+    dot.style.cssText = `display:block;left:${ft.cx + ft.u * ft.R}px;top:${ft.cy - ft.v * ft.R}px`;
+    // prévia da trajetória para o ponto de contato atual (completa só com Linha de Mira / treino alto)
+    const v = ftVel(b.x, b.y, b.z, b.hx, b.hz, ft.u - ft.tx, ft.v - ft.ty, b.rz), pts = [], n = b.full ? 20 : 6;
+    for (let i = 2; i <= n + 1; i++) { const t = i * 0.045; pts.push([b.x + v.vx * t, b.y + v.vy * t - 0.5 * CT.G * t * t, b.z + v.vz * t, 0.32]); }
+    GFX.traj(pts); set('ft-tip', 'Solte para arremessar');
   }
 
   /* ----- atualização por quadro ----- */
@@ -92,7 +106,7 @@ const HUD = (() => {
     ['sb', 'mystats', 'goals', 'btn-pause'].forEach((id) => vis(id, m));
     vis('trainbar', kind === 'train');
     ['b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump', 'btn-rew', 'replay', 'skiprep', 'ftui'].forEach((id) => vis(id, false));
-    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; el.banner.innerHTML = ''; aimLabel(false);
+    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; GFX.setFov(46); el.banner.innerHTML = ''; aimLabel(false);
     if (m) {
       const c = Match.cfg;
       el['sb-a'].textContent = c.t0.short; el['sb-a'].style.background = U.hex(c.t0.c1);
@@ -126,7 +140,7 @@ const HUD = (() => {
     if (m === 'ball' || m === 'off') { cls('b-pass', 'act ' + (m === 'ball' ? 's2' : 'y s1')); set2('b-pass', m === 'ball' ? 'PASSAR' : 'PEDIR BOLA'); }
     if (m === 'ball') { cls('b-drib', 'act s3' + (v.dead ? ' warn' : '')); set2('b-lay', v.dunk ? 'ENTERRAR' : 'BANDEJA'); }
     if (m === 'def' || m === 'loose' || m === 'off') { cls('b-jump', 'act ' + (m === 'off' ? 's2' : 'y s1')); set2('b-jump', m === 'def' ? 'BLOQUEAR' : 'PULAR'); }
-    vis('btn-rew', v.rewind); set('hint', v.hint);
+    vis('btn-rew', v.rewind); set('hint', v.hint); if (ft.on) vis('joyhint', false);
     if (!joyUsed && (Input.joy.x || Input.joy.y)) { joyUsed = true; vis('joyhint', false); }
   }
   const set2 = (id, v) => { const k = 's_' + id; if (cache[k] !== v) { cache[k] = v; el[id].lastElementChild.textContent = v; } };
@@ -319,6 +333,7 @@ const UI = (() => {
       <p>⚡ <b>Driblar:</b> arranque para desequilibrar o marcador. Se você segurar a bola (finta de arremesso), não pode driblar de novo: é <b>drible duplo</b>; e andar com ela é <b>andada</b>. (PC: Q)</p>
       <p>💥 <b>Enterrar/Bandeja:</b> aparece perto da cesta. (PC: F)</p>
       <p>🛡️ <b>Defesa:</b> marque o jogador do anel vermelho. ROUBAR perto da bola; BLOQUEAR no tempo do arremesso. Errar o tempo pode dar falta — com 5 você é eliminado.</p>
+      <p>🎯 <b>Lance livre:</b> a bola aparece grande na sua frente. Toque nela <b>em cima do alvo verde</b> que se move: tocar à esquerda manda a bola para a direita, tocar embaixo dá mais força. Segure o dedo para ver a prévia e solte para arremessar.</p>
       <p>📏 <b>Regras:</b> 24s de posse (14 após rebote de ataque), 8s para passar do meio, sem volta de quadra, 3s no garrafão, bônus de lances livres após 4 faltas coletivas no quarto, prorrogação em caso de empate.</p></div>
       <button class="btn y big" data-a="close">ENTENDI!</button>`, { onClose: () => { if (!S.tutorial) { S.tutorial = true; saveGame(); } if (Game.mode === 'match' && Match.state.paused) pauseMenu(); } });
   }

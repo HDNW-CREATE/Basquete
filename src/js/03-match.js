@@ -47,7 +47,13 @@ const Phys = {
           if (dl < minD && dl > 1e-5) {
             nx /= dl; ny /= dl; nz /= dl;
             const vn = B.vx * nx + B.vy * ny + B.vz * nz;
-            if (vn < 0) { B.vx -= 1.52 * vn * nx; B.vy -= 1.52 * vn * ny; B.vz -= 1.52 * vn * nz; ev.rim = Math.min(1, -vn / 4); }
+            if (vn < 0) {
+              // aro "macio": restituição baixa + atrito, para a bola quicar no aro e ainda poder cair
+              B.vx -= 1.4 * vn * nx; B.vy -= 1.4 * vn * ny; B.vz -= 1.4 * vn * nz;
+              B.vx *= 0.94; B.vz *= 0.94; ev.rim = Math.min(1, -vn / 4);
+              // bola por cima do aro: o giro para trás puxa de leve para dentro da cesta
+              if (ny > 0.25 && rh < CT.RIM_R + 0.06) { B.vx -= (dxr / rh) * 0.32; B.vz -= (dzr / rh) * 0.32; }
+            }
             B.x = px + nx * minD; B.y = CT.HOOP_Y + ny * minD; B.z = pz + nz * minD;
           }
         }
@@ -81,8 +87,19 @@ function aimViz(x, z, hp, a, full, fl) {
   const sp = GFX.project(x + Math.sin(ang) * (1.4 + a.p * 2.2), 0.6, z + Math.cos(ang) * (1.4 + a.p * 2.2));
   return { x: sp.x, y: sp.y, good, long, lat };
 }
-// zona verde do lance livre cresce com o nível de treino
-const ftZone = () => 0.17 + S.training.level * 0.008;
+/* ---- Lance livre em primeira pessoa ----
+   A bola fica grande à frente da câmera. O jogador toca num ponto dela; o desvio (du, dv)
+   entre o toque e o "alvo verde" (em raios da bola) define o chute, e a física faz o resto:
+   - tocar à esquerda manda a bola para a direita (e vice-versa);
+   - tocar mais embaixo dá mais força/altura (bola longa); mais em cima, bola curta. */
+const ftZone = () => 0.2 + S.training.level * 0.007;       // raio do alvo verde (cresce com o treino)
+const FT_BALL = { ahead: 1.1, y: 1.69 };                  // posição da bola à frente do arremessador
+function ftVel(bx, by, bz, hx, hz, du, dv, rz) {
+  if (Math.hypot(du, dv) < rz) { du *= 0.15; dv *= 0.15; }   // dentro do alvo: quase perfeito
+  const T = {}; Phys.launch(T, bx, by, bz, hx, CT.HOOP_Y, hz, 1.15);
+  const v0 = Math.hypot(T.vx, T.vy, T.vz), sp = v0 * (1.004 - dv * 0.075), yaw = Math.atan2(T.vx, T.vz) + du * 0.2 * (hz < 0 ? 1 : -1), th = Math.asin(T.vy / v0);
+  return { vx: Math.sin(yaw) * Math.cos(th) * sp, vy: Math.sin(th) * sp, vz: Math.cos(yaw) * Math.cos(th) * sp };
+}
 
 /* ---------------- Motor da partida ---------------- */
 const Match = (() => {
@@ -175,7 +192,7 @@ const Match = (() => {
       score: [0, 0], tf: [0, 0], to: [2, 2], poss: -1, arrow: 0, front: false, backT: 0, scOff: false, clockHold: true,
       time: 0, ts: 1, headless: !!cfg.headless, auto: !!cfg.auto, paused: false, pf: null, ft: null, inb: null,
       run: { team: -1, pts: 0 }, boostT: [0, 0], boost: cfg.boost || {}, rewindLeft: cfg.boost && cfg.boost.rewind ? 1 : 0,
-      snapStr: null, rewT: 0, userShot: false, coins: 0, callT: 0, passTgt: -1, aim: { on: false, p: 0, dev: 0 },
+      snapStr: null, rewT: 0, userShot: false, coins: 0, ftCamT: 0, ftCamX: 0, ftCamZ: 0, callT: 0, passTgt: -1, aim: { on: false, p: 0, dev: 0 },
       userOut: false, userFinal: null, replay: false, replayIn: 0, ftIn: null, dbg: {}, ended: false, hint: '',
     });
     P.length = 0;
@@ -381,15 +398,15 @@ const Match = (() => {
       }
     }
     if (M.run.team === team) M.run.pts += pts; else M.run = { team, pts };
-    const dunk = B.dunk, ft = B.ft;
+    const dunk = B.dunk, ft = B.ft, rimIn = B.rim && !dunk;
     B.state = 'drop'; B.vx *= 0.3; B.vz *= 0.3; B.vy = Math.max(B.vy, -3.2);
     if (!M.headless) {
       const hp = GFX.hoops[team]; hp.kick(B.vx, B.vz, dunk ? 1.6 : 1);
       SND.play('swish'); SND.cheer(team === 0 ? 1 : 0.45); GFX.hypeUp(team === 0 ? 0.9 : 0.3);
       const t = team ? CFG.t1 : CFG.t0;
       GFX.burst(hp.x, CT.HOOP_Y - 0.3, hp.z, [t.c1, t.c2, 0xffffff, 0xffd400], dunk || pts === 3 ? 44 : 22, dunk ? 6 : 4);
-      if (!ft) fx('banner', dunk ? 'ENTERRADA!' : pts === 3 ? '3 PONTOS!' : 'CESTA!', sh ? (sh.isUser ? 'VOCÊ' : sh.name) + ` · ${sh.pts} pts` : '', team === 0 ? 'good' : 'bad');
-      else fx('float', hp.x, CT.HOOP_Y + 0.6, hp.z, '+1', team === 0 ? 'good' : 'bad');
+      if (!ft) fx('banner', dunk ? 'ENTERRADA!' : pts === 3 ? '3 PONTOS!' : 'CESTA!', (rimIn ? 'No aro... e caiu! · ' : '') + (sh ? (sh.isUser ? 'VOCÊ' : sh.name) + ` · ${sh.pts} pts` : ''), team === 0 ? 'good' : 'bad');
+      else fx('float', hp.x, CT.HOOP_Y + 0.6, hp.z, rimIn ? 'NO ARO... E CAIU! +1' : '+1', team === 0 ? 'good' : 'bad');
       if (sh && sh.isUser && M.boost.coin && !ft) { M.coins += 12; GFX.burst(hp.x, CT.HOOP_Y, hp.z, [0xffd400, 0xffb300], 16, 3); SND.play('coin'); fx('float', hp.x, CT.HOOP_Y + 1.1, hp.z, '+12 🪙', 'coin'); }
     }
     return { team, sh, pts, dunk };
@@ -512,8 +529,13 @@ const Match = (() => {
     s.st = 'shoot'; s.stT = 0.2; s.sh = { type: 'jump', rel: true, pts: 1 };
     const hp = heldPos(s); let ux = h.x - hp.x, uz = h.z - hp.z; const l = Math.hypot(ux, uz); ux /= l; uz /= l;
     Phys.launch(B, hp.x, hp.y, hp.z, h.x + ux * long - uz * lat, CT.HOOP_Y, h.z + uz * long + ux * lat, 0.93);
+    ftAfter(s);
+  }
+  function ftAfter(s) {
+    const f = M.ft;
     Object.assign(B, { state: 'shot', holder: -1, shooter: s.id, pts: 1, rim: false, fromShot: true, ft: true, dunk: false, lastTouch: s.id, lastTeam: s.team, noGrab: 0 });
-    s.fta++; fx('ftShow', false);
+    s.fta++; fx('ftShow', false); snd('pass', 0.7);
+    if (isCtl(s)) { M.ftCamT = 1.7; M.ftCamX = s.x; M.ftCamZ = s.z; }      // mantém a visão em 1ª pessoa durante o voo
     if (f.i === f.n - 1 && M.clock > 0) { M.phase = 'live'; M.scOff = true; M.clockHold = true; M.ft = null; }   // último lance: bola viva no rebote
     else { f.st = 'fly'; f.t = 0; f.scored = false; }
   }
@@ -525,17 +547,22 @@ const Match = (() => {
       holdBall(dt);
       if (f.t > 1.7) { const g = f.pos[s.id]; s.x = g.x; s.z = g.z; s.vx = s.vz = 0; s.rot = Math.atan2(h.x - s.x, h.z - s.z); f.st = 'aim'; f.t = 0; M.ftIn = null; if (isCtl(s)) fx('ftShow', true, f.i + 1, f.n); }
     } else if (f.st === 'aim') {
-      s.st = 'aim'; holdBall(dt);
       if (isCtl(s) && !M.headless) {
-        if (M.ftIn || f.t > 12) {
-          const a = M.ftIn || { aim: U.rand(-0.6, 0.6), pow: U.rand(-0.6, 0.6) }, gz = 0.17 + CFG.tlvl * 0.008 + (M.boost.nose ? 0.06 : 0);
-          const sc = (e) => (Math.abs(e) < gz ? e * 0.1 : e);
-          if (Math.abs(a.aim) < gz && Math.abs(a.pow) < gz) fx('float', s.x, 2.6, s.z, 'PERFEITO!', 'good');
-          ftShoot(sc(a.pow) * 0.5 + U.gauss() * 0.03, sc(a.aim) * 0.34 + U.gauss() * 0.025);
+        // usuário: bola parada à frente da câmera esperando o toque
+        s.st = 'free'; B.state = 'held'; B.vx = B.vy = B.vz = 0;
+        B.x = s.x; B.y = FT_BALL.y; B.z = s.z + dirOf(s.team) * FT_BALL.ahead;
+        if (M.ftIn || f.t > 14) {
+          const a = M.ftIn || { du: U.rand(-0.5, 0.5), dv: U.rand(-0.5, 0.5) }, rz = ftZone() + (M.boost.nose ? 0.07 : 0);
+          if (Math.hypot(a.du, a.dv) < rz) { snd('perfect'); fx('float', h.x, CT.HOOP_Y + 1.2, h.z, 'PERFEITO!', 'good'); }
+          Object.assign(B, ftVel(B.x, B.y, B.z, h.x, h.z, a.du, a.dv, rz));
+          ftAfter(s);
         }
-      } else if (f.t > 0.9) {
-        if (Math.random() < 0.5 + 0.38 * s.sk.sh) ftShoot(U.gauss() * 0.035, U.gauss() * 0.03);
-        else { const a = Math.random() * 6.28, r = U.rand(0.17, 0.3); ftShoot(Math.cos(a) * r, Math.sin(a) * r * 0.7); }
+      } else {
+        s.st = 'aim'; holdBall();
+        if (f.t > 0.9) {
+          if (Math.random() < 0.5 + 0.38 * s.sk.sh) ftShoot(U.gauss() * 0.035, U.gauss() * 0.03);
+          else { const a = Math.random() * 6.28, r = U.rand(0.17, 0.3); ftShoot(Math.cos(a) * r, Math.sin(a) * r * 0.7); }
+        }
       }
     } else if (f.st === 'fly') {
       const ev = {}; Phys.step(B, dt, ev); ballFx(ev);
@@ -1027,7 +1054,7 @@ const Match = (() => {
     // marcadores
     const live = M.phase === 'live' || M.phase === 'inbound';
     GFX.setRing(GFX.userRing, !!u, u ? u.x : 0, u ? u.z : 0);
-    GFX.star.visible = !!u; if (u) GFX.star.position.set(u.x, u.y + 2.25 + Math.sin(GFX.time * 4) * 0.05, u.z);
+    GFX.star.visible = !!u && M.phase !== 'ft'; if (u) GFX.star.position.set(u.x, u.y + 2.25 + Math.sin(GFX.time * 4) * 0.05, u.z);
     const defending = u && live && M.poss === 1, man = u ? P[u.man] : null;
     GFX.setRing(GFX.manRing, !!defending, man ? man.x : 0, man ? man.z : 0);
     const pt = u && has(u) && M.passTgt >= 0 && M.phase === 'live' && !M.auto ? P[M.passTgt] : null;
@@ -1041,8 +1068,12 @@ const Match = (() => {
     } else { GFX.setArrow(false); GFX.traj([]); fx('aimLabel', false); }
     GFX.floor(fl);
     // câmera isométrica acompanhando a jogada
-    const ftU = M.phase === 'ft' && M.ft && isCtl(P[M.ft.s]) && M.ft.st !== 'setup';
-    if (ftU) { const s = P[M.ft.s]; GFX.setFov(46); GFX.cam(s.x, 4.3, s.z + 5.2, 0, 2.7, -CT.HOOP_Z, 1 - Math.exp(-dt * 4)); }
+    const ftS = M.phase === 'ft' && M.ft && isCtl(P[M.ft.s]) && (M.ft.st !== 'setup' || M.ft.i > 0) ? P[M.ft.s] : null;
+    if (M.ftCamT > 0) M.ftCamT -= dt;
+    if (ftS || M.ftCamT > 0) {                            // lance livre do usuário: visão em primeira pessoa
+      const x = ftS ? ftS.x : M.ftCamX, z = ftS ? ftS.z : M.ftCamZ;
+      GFX.setFov(58); GFX.cam(x, 1.75, z - 0.1, 0, 2.6, -CT.HOOP_Z, 1 - Math.exp(-dt * 7));
+    }
     else {
       let cx = B.x, cz = B.z;
       if (u) { cx = B.x * 0.55 + u.x * 0.45; cz = B.z * 0.55 + u.z * 0.45; }
@@ -1091,7 +1122,9 @@ const Match = (() => {
   return {
     start, update, sync, view, act, aimStart, aimMove, aimEnd, canAim, rewind, timeout, fastForward, simulate, stop, tapPass, endReplay,
     nextPeriod: () => { if (M.phase === 'qbreak') nextPeriod(); },
-    ftInput: (aim, pow) => { M.ftIn = { aim, pow }; },
+    ftInput: (du, dv) => { M.ftIn = { du, dv }; },
+    // bola do lance livre do usuário (para a interface saber onde ela está na tela)
+    ftBall: () => (M.phase === 'ft' && M.ft && M.ft.st === 'aim' && isCtl(P[M.ft.s]) ? { x: B.x, y: B.y, z: B.z, hx: 0, hz: -CT.HOOP_Z, rz: ftZone() + (M.boost.nose ? 0.07 : 0), full: !!M.boost.aim } : null),
     pause: (v) => { M.paused = v; },
     userScreen: () => { const u = user(); return u ? GFX.project(u.x, 1, u.z) : null; },
     debug: { startFT, foul, violation, endPeriod, give, startLay },
