@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0e1633">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>CUBOLA — Estrela das Quadras</title>
+<title>Cubola Estrela das Quadras</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
@@ -16,6 +16,7 @@
    Todas as medidas em "em": o tamanho base escala com a largura do palco.
    ===================================================================== */
 :root {
+  color-scheme: dark;                     /* visual único (escuro), independente do tema do sistema */
   --navy: #0e1633; --navy2: #18224a; --blue: #2b55e6; --blue2: #1b3bb0; --sky: #55b8ff;
   --yellow: #ffc928; --yellow2: #e29a00; --orange: #ff7a1a; --mint: #3ee6a8; --red: #ff4d4d; --pink: #ff5bd8;
   --ink: #0a0f24; --sw: 360px;
@@ -23,7 +24,7 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
 html, body { margin: 0; height: 100%; background: #05070f; overflow: hidden; overscroll-behavior: none; touch-action: pan-y; }
 body { font-family: 'Lilita One', 'Arial Black', 'Segoe UI', system-ui, sans-serif; color: #fff; }
-#stage { position: relative; width: min(100vw, 62vh); width: min(100vw, 62dvh); height: 100vh; height: 100dvh; margin: 0 auto; overflow: hidden; background: #7fb6f5; }
+#stage { position: relative; width: min(100vw, 62vh); width: min(100vw, 62dvh); height: 100%; margin: 0 auto; overflow: hidden; background: #7fb6f5; }
 #gl, #touch, #ui { position: absolute; inset: 0; width: 100%; height: 100%; }
 #gl { display: block; }
 #touch { touch-action: none; }
