@@ -126,8 +126,8 @@ const lifeBonus = (k) => LIFE.slice(0, S.lifestyle).reduce((s, l) => s + (l[k] |
 /* ---------- Melhorias (boosters) usadas antes da partida ---------- */
 const BOOST = {
   coin:   { name: 'Arremesso de Moedas', ic: '🪙', cost: 50,  desc: 'Cada cesta sua rende +12 moedas nesta partida.' },
-  slow:   { name: 'Câmera Lenta',        ic: '⏱️', cost: 150, desc: 'O tempo desacelera enquanto você mira o arremesso.' },
-  aim:    { name: 'Linha de Mira',       ic: '🎯', cost: 50,  desc: 'Mostra a trajetória completa até o aro.' },
+  slow:   { name: 'Câmera Lenta',        ic: '⏱️', cost: 150, desc: 'O tempo quase para enquanto você mira o arremesso.' },
+  aim:    { name: 'Linha de Mira',       ic: '🎯', cost: 50,  desc: 'Mostra o arco que a bola vai fazer enquanto você empurra.' },
   nose:   { name: 'Faro de Cesta',       ic: '👟', cost: 200, desc: 'Seus arremessos ficam bem mais precisos.' },
   rewind: { name: 'Retroceder',          ic: '⏪', cost: 200, desc: 'Errou? Volte no tempo e refaça a jogada (1x).' },
 };
@@ -209,7 +209,7 @@ function defaultSave() {
     career: { g: 0, wins: 0, pts: 0, ast: 0, reb: 0, tpm: 0, dunk: 0, def: 0, rate: 0, titles: 0 },
     national: { called: false, played: 0, wins: 0 },
     daily: null, claimed: {}, tutorial: false,
-    settings: { sound: true, music: true, qlen: 120, shadows: true },
+    settings: { sound: true, music: true, qlen: 120, shadows: true, arremesso: {} },   // arremesso: ajustes feitos em "Ajustar arremesso"
   };
 }
 function loadGame() {
@@ -219,6 +219,7 @@ function loadGame() {
   } catch (e) { S = defaultSave(); }
   ensureDaily();
   tickEnergy();
+  aplicarAjustesArremesso();
 }
 function saveGame() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* armazenamento indisponível */ }

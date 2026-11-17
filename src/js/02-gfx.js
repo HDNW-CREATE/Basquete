@@ -340,7 +340,7 @@ const GFX = (() => {
   }
 
   /* ---------- bola ---------- */
-  let ball, ballShadowless;
+  let ball, ball2, glow, trail;
   function buildBall() {
     const t = canvasTex(128, 64, (g) => {
       g.fillStyle = '#ee7a23'; g.fillRect(0, 0, 128, 64);
@@ -351,7 +351,24 @@ const GFX = (() => {
     }, 'ball');
     ball = new THREE.Mesh(new THREE.SphereGeometry(CT.BALL_R, 12, 9), new THREE.MeshLambertMaterial({ map: t }));
     ball.castShadow = true; scene.add(ball);
+    // segunda bola: a que acabou de ser arremessada continua quicando enquanto a nova já aparece na mão
+    ball2 = new THREE.Mesh(ball.geometry, ball.material); ball2.castShadow = true; ball2.visible = false; scene.add(ball2);
+    // brilho da bola com efeito (curva) e rastro do voo
+    glow = new THREE.Mesh(new THREE.SphereGeometry(CT.BALL_R * 1.45, 14, 10),
+      new THREE.MeshBasicMaterial({ color: 0x6fe3ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    glow.visible = false; scene.add(glow);
+    trail = new THREE.InstancedMesh(new THREE.SphereGeometry(CT.BALL_R * 0.85, 8, 6),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.34, depthWrite: false }), 32);
+    trail.count = 0; trail.frustumCulled = false; scene.add(trail);
   }
+  // brilho em volta da bola (k = 0 desliga · 1 = máximo)
+  function setGlow(k, color) {
+    glow.visible = k > 0.01; if (!glow.visible) return;
+    glow.position.copy(ball.position); glow.material.color.setHex(color); glow.material.opacity = 0.1 + 0.16 * k;
+    glow.scale.setScalar(ball.scale.x * (0.95 + 0.07 * Math.sin(time * 16) + 0.1 * k));
+  }
+  // rastro: lista de [x, y, z, escala], do ponto mais novo para o mais antigo
+  function setTrail(pts, color = 0xffffff) { trail.material.color.setHex(color); setDots(trail, pts); }
 
   /* ---------- marcadores: seta de força, pontilhados, anéis, estrela ---------- */
   let arrow, arrowBody, arrowHead, trajDots, floorDots, userRing, manRing, passRing, star, cones = [];
@@ -483,6 +500,7 @@ const GFX = (() => {
     init, resize, render, update, cam, project, paintCourt, setBoard, makeModel, disposeModel, animate, applyPose, POSE_KEYS,
     setArrow, setRing, setCones, burst, hoops,
     traj: (pts) => setDots(trajDots, pts), floor: (pts) => setDots(floorDots, pts),
+    setGlow, setTrail, get ball2() { return ball2; },
     get ball() { return ball; }, get star() { return star; }, get userRing() { return userRing; }, get manRing() { return manRing; }, get passRing() { return passRing; },
     get camera() { return camera; }, get size() { return { W, H }; },
     hypeUp: (a) => { hype = Math.min(1.2, hype + a); }, shake: (a) => { shakeA = Math.max(shakeA, a); },

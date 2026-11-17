@@ -1,73 +1,63 @@
 /* =====================================================================
    Arquivo 05: treinos (minigames)
    - three: 5 posições x 3 bolas atrás da linha de 3, contra o relógio
-   - ft:    10 lances livres com mira e barra de força
+   - ft:    10 lances livres
    - cones: slalom de drible entre cones, contra o relógio
-   Reaproveita a física (Phys), a mira (aimViz) e os bonecos (GFX).
+   Os arremessos (three e ft) usam o mesmo gesto de swipe em primeira pessoa
+   da partida: BallController + ThrowCalculator + ShotFeedback.
    ===================================================================== */
 const Train = (() => {
   const T = {}, B = { x: 0, y: 1, z: 0, vx: 0, vy: 0, vz: 0 };
   let model = null, done = null, cones = [];
   const HZ = -CT.HOOP_Z;
   const INFO = {
-    three: { name: 'ARREMESSO DE 3', ic: '🎯', desc: '5 posições, 3 bolas em cada. A última de cada posição vale 2!', stars: [6, 11, 15] },
-    ft: { name: 'LANCES LIVRES', ic: '🏀', desc: '10 lances livres. Toque na bola em cima do alvo verde: o ponto do toque define a direção e a força.', stars: [4, 6, 8] },
+    three: { name: 'ARREMESSO DE 3', ic: '🎯', desc: '5 posições, 3 bolas em cada. Segure a bola e deslize para cima. A última de cada posição vale 2 e cesta com curva vale +1!', stars: [6, 11, 15] },
+    ft: { name: 'LANCES LIVRES', ic: '🏀', desc: '10 lances livres. Segure a bola e deslize para cima: seta amarela é a força ideal. Solte com o círculo pequeno para mais precisão.', stars: [4, 6, 8] },
     cones: { name: 'DRIBLE ENTRE CONES', ic: '🚧', desc: 'Contorne os cones alternando os lados o mais rápido possível.', stars: [12, 9.5, 7.5] },
   };
 
   function start(kind, cb) {
     done = cb;
-    Object.assign(T, { kind, on: true, t: 0, score: 0, st: 'ready', stT: 0, x: 0, z: 0, y: 0, vx: 0, vz: 0, rot: Math.PI, dph: 0, aim: { on: false, p: 0, dev: 0 }, msg: '', shot: 0, made: false, spot: 0, ball: 0, time: 45, gate: 0, pen: 0, ftIn: null, sh: false });
+    Object.assign(T, { kind, on: true, t: 0, score: 0, st: 'ready', stT: 0, x: 0, z: 0, y: 0, vx: 0, vz: 0, rot: Math.PI, dph: 0, msg: '', shot: 0, made: false, spot: 0, ball: 0, time: 60, gate: 0, pen: 0, sw: null, rimHit: false, over: false });
     GFX.disposeModel(model);
     const t = TEAMS[S.teamId];
     model = GFX.makeModel(Object.assign({}, S.look, { c1: t.c1, c2: t.c2 }));
     GFX.paintCourt(t.c1, t.c2); GFX.setCones([]); cones = [];
     if (kind === 'three') placeSpot();
-    else if (kind === 'ft') { T.x = 0; T.z = -(CT.HL - CT.FT_D - 0.25); HUD.ftShow(true, 1, 10); }
+    else if (kind === 'ft') { T.x = 0; T.z = -(CT.HL - CT.FT_D - 0.25); }
     else {
       const list = []; for (let i = 0; i < 9; i++) list.push([0, 7 - i * 2]);
       cones = GFX.setCones(list).map((m, i) => ({ m, x: 0, z: list[i][1], hit: false }));
       T.x = 0.9; T.z = 9.2; T.st = 'run';
     }
     GFX.star.visible = false;
-    Input.setHandler({
-      joy: kind === 'cones',
-      origin: () => (kind === 'three' ? GFX.project(T.x, 1, T.z) : null),
-      aimStart: () => { if (kind !== 'three' || T.st !== 'ready') return false; T.st = 'aim'; T.aim = { on: true, p: 0, dev: 0 }; return true; },
-      aimMove: (p, d) => { T.aim.p = U.clamp(p, 0, 1.4); T.aim.dev = U.clamp(d, -0.6, 0.6); },
-      aimEnd: (cancel) => { if (T.st === 'aim') { T.aim.on = false; if (cancel || T.aim.p < 0.3) T.st = 'ready'; else shoot3(); } },
-      aiming: () => T.st === 'aim',
-    });
+    Input.setHandler({ joy: kind === 'cones' });
+    if (kind !== 'cones') newBall();
   }
   function placeSpot() {
     const a = [-1.05, -0.55, 0, 0.55, 1.05][T.spot];
     T.x = Math.sin(a) * 7.15; T.z = HZ + Math.cos(a) * 7.15; T.rot = Math.atan2(-T.x, HZ - T.z);
   }
-  const hand = () => ({ x: T.x + Math.sin(T.rot) * 0.24, y: T.y + 2.28, z: T.z + Math.cos(T.rot) * 0.24 });
   const skill = () => Math.min(0.95, 0.58 + S.training.level * 0.019);
 
-  function launch(long, lat, th) {
-    const hp = hand(); let ux = -hp.x, uz = HZ - hp.z; const l = Math.hypot(ux, uz); ux /= l; uz /= l;
-    Phys.launch(B, hp.x, hp.y, hp.z, ux * long - uz * lat, CT.HOOP_Y, HZ + uz * long + ux * lat, th);
-    T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; SND.play('pass', 0.6);
-  }
-  function shoot3() {
-    const a = T.aim, d = U.dist(T.x, T.z, 0, HZ), E = aimErr(a, d);
-    if (E.perfect) { SND.play('perfect'); HUD.float(T.x, 2.7, T.z, 'PERFEITO!', 'good'); }
-    const sg = (0.022 + 0.0045 * d) * (1.4 - 0.62 * skill());
-    launch(E.long + U.gauss() * sg, E.lat + U.gauss() * sg * 0.8, (U.clamp(62 - d * 1.9, 47, 62) * Math.PI) / 180);
-  }
-  // lance livre: bola à frente da câmera; o toque na bola define o chute (ver ftVel)
-  const ftBall = () => (T.on && T.kind === 'ft' && T.st === 'ready' ? { x: T.x, y: FT_BALL.y, z: T.z - FT_BALL.ahead, hx: 0, hz: HZ, rz: ftZone(), full: S.training.level >= 5 } : null);
-  function ftInput(du, dv) {
-    const b = ftBall(); if (!b) return;
-    if (Math.hypot(du, dv) < b.rz) { SND.play('perfect'); HUD.float(0, CT.HOOP_Y + 1.2, HZ, 'PERFEITO!', 'good'); }
-    B.x = b.x; B.y = b.y; B.z = b.z; Object.assign(B, ftVel(b.x, b.y, b.z, 0, HZ, du, dv, b.rz));
-    T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; SND.play('pass', 0.7);
-    HUD.ftShow(false);
+  // bola nova em primeiro plano: o BallController cuida do gesto e avisa em onThrow quando ela for lançada
+  function newBall() {
+    T.st = 'ready'; T.stT = 0;
+    BallController.start({
+      owner: 'train', hx: 0, hz: HZ,
+      title: T.kind === 'ft' ? `LANCE LIVRE ${Math.min(10, T.shot + 1)}/10` : T.ball === 2 ? 'BOLA DOURADA · VALE 2' : 'ARREMESSO DE 3',
+      mods: () => ({ assist: (skill() - 0.6) * 0.1 + (T.kind === 'ft' ? 0.03 : 0), noise: 0.004, contest: 0 }),
+      onThrow: (L) => {
+        if (!T.on || T.st !== 'ready') return false;
+        Object.assign(B, { x: L.x, y: L.y, z: L.z, vx: L.vx, vy: L.vy, vz: L.vz, cax: L.cax, caz: L.caz });
+        T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; T.over = false; T.sw = { q: L.quality, spin: L.spin };
+        return true;
+      },
+      arc: S.training.level >= 5, ball: B, flying: () => T.on && T.st === 'fly' && !T.rimHit && !T.made,
+    });
   }
   function finish() {
-    if (!T.on) return; T.on = false; HUD.ftShow(false);
+    if (!T.on) return; T.on = false; BallController.end();
     const I = INFO[T.kind]; let val = T.score, stars;
     if (T.kind === 'cones') { val = T.t + T.pen; stars = I.stars.filter((s) => val <= s).length; }
     else stars = I.stars.filter((s) => val >= s).length;
@@ -104,48 +94,49 @@ const Train = (() => {
       T.msg = `⏱ ${(T.t + T.pen).toFixed(1)}s`;
       GFX.setFov(46); GFX.cam(T.x * 0.6, 11, T.z + 9.5, T.x * 0.6, 0.6, T.z - 2.5, 1 - Math.exp(-dt * 4));
     } else {
-      if (T.kind === 'three' && T.st !== 'done') { T.time -= dt; if (T.time <= 0 && T.st !== 'fly') return finish(); }
-      if (T.st === 'ready' || T.st === 'aim') {
-        mode = T.st === 'aim' ? 'aim' : T.kind === 'ft' ? 'idle' : 'hold'; T.y = 0;
-        const hp = T.kind === 'ft' ? ftBall() : T.st === 'aim' ? hand() : { x: T.x + Math.sin(T.rot) * 0.36, y: 1.2, z: T.z + Math.cos(T.rot) * 0.36 };
-        B.x = hp.x; B.y = hp.y; B.z = hp.z; B.vx = B.vy = B.vz = 0;
-        if (T.st === 'aim') { const r = aimViz(T.x, T.z, hand(), T.aim, S.training.level >= 5, fl); HUD.aimLabel(true, r.x, r.y, Math.round(T.aim.p * 100), r.good, true); }
+      if (T.kind === 'three') { T.time -= dt; if (T.time <= 0 && T.st !== 'fly') return finish(); }
+      if (T.st === 'ready') {
+        // bola na mão: a posição vem do BallController (parada, presa ao dedo ou reaparecendo)
+        const q = BallController.pos; B.x = q.x; B.y = q.y; B.z = q.z; B.vx = B.vy = B.vz = 0;
       } else if (T.st === 'fly') {
-        mode = T.stT < 0.4 && T.kind !== 'ft' ? 'shoot' : 'idle'; T.y = T.stT < 0.5 && T.kind !== 'ft' ? 4 * 0.45 * (T.stT / 0.5) * (1 - T.stT / 0.5) : 0;
         const ev = {}; Phys.step(B, dt, ev);
-        if (ev.floor) SND.play('bounce', ev.floor); if (ev.rim) { SND.play('rim', ev.rim); GFX.hoops[0].shake = 0.4; GFX.hoops[0].kick(B.vx * 0.3, B.vz * 0.3, 0.15); T.rimHit = true; } if (ev.board) SND.play('board');
+        if (ev.floor) SND.play('bounce', ev.floor); if (ev.rim) { SND.play('rim', ev.rim); GFX.hoops[0].shake = 0.4; GFX.hoops[0].kick(B.vx * 0.3, B.vz * 0.3, 0.15); T.rimHit = true; } if (ev.board) { SND.play('board'); T.rimHit = true; }
         if (ev.score === 0 && !T.made) {
-          T.made = true; const gold = T.kind === 'three' && T.ball === 2;
-          T.score += gold ? 2 : 1; SND.play('swish'); GFX.hoops[0].kick(B.vx, B.vz, 1); GFX.hypeUp(0.5);
+          T.made = true; const gold = T.kind === 'three' && T.ball === 2, curve = T.sw && T.sw.spin ? ARREMESSO.bonusCurvaPontos : 0;
+          T.score += (gold ? 2 : 1) + curve; SND.play('swish'); GFX.hoops[0].kick(B.vx, B.vz, 1); GFX.hypeUp(0.5);
           GFX.burst(0, CT.HOOP_Y - 0.3, HZ, [0xffd400, 0xffffff, 0xff7a1a], 20, 4);
-          HUD.float(0, CT.HOOP_Y + 0.7, HZ, (T.rimHit ? 'NO ARO... E CAIU! ' : '') + (gold ? '+2' : '+1'), 'good'); B.vx *= 0.3; B.vz *= 0.3;
+          HUD.float(0, CT.HOOP_Y + 0.7, HZ, (T.rimHit ? 'NO ARO... E CAIU! ' : '') + (gold ? '+2' : '+1') + (curve ? ` +${curve} CURVA` : ''), 'good'); B.vx *= 0.3; B.vz *= 0.3;
+          ShotFeedback.scored(T.sw); T.stT = 0;
         }
-        if ((T.made && T.stT > 0.9 && B.y < 2.2) || (B.y < 1 && T.stT > 0.7) || T.stT > 3) {       // próxima bola
-          T.shot++; T.st = 'ready'; T.stT = 0;
+        // resultado decidido (cesta, ou bola já abaixo do aro sem chance): a bola antiga continua quicando
+        // e some sozinha, enquanto uma nova sobe da base da tela
+        if (!T.over && !T.made && (B.y < 2.3 && B.vy < 0 || T.stT > 3.2)) { T.over = true; T.stT = 0; }
+        if ((T.made && T.stT > 0.55) || (T.over && T.stT > 0.3)) {
+          ShotFeedback.ghostFrom(B, T.made ? 0.9 : ARREMESSO.tempoSumirErro);
+          T.shot++;
           if (T.kind === 'three') { T.ball++; if (T.ball > 2) { T.ball = 0; T.spot++; if (T.spot > 4) return finish(); placeSpot(); } if (T.time <= 0) return finish(); }
-          else { if (T.shot >= 10) return finish(); HUD.ftShow(true, T.shot + 1, 10); }
+          else if (T.shot >= 10) return finish();
+          newBall();
         }
       }
-      if (T.st !== 'aim') { GFX.setArrow(false); GFX.traj([]); HUD.aimLabel(false); }
       T.msg = T.kind === 'three' ? `⏱ ${Math.max(0, T.time).toFixed(0)}s · bola ${Math.min(15, T.spot * 3 + T.ball + 1)}/15` : `Lance ${Math.min(10, T.shot + 1)}/10`;
-      GFX.setFov(T.kind === 'ft' ? 58 : 46);
-      if (T.kind === 'ft') GFX.cam(T.x, 1.75, T.z - 0.1, 0, 2.6, HZ, 1 - Math.exp(-dt * 7));   // primeira pessoa
-      else {                                           // câmera atrás do arremessador, olhando para a cesta
-        const dx = T.x, dz = T.z - HZ, l = Math.hypot(dx, dz) || 1;
-        GFX.cam(U.clamp(T.x + (dx / l) * 6, -9.2, 9.2), 4.6, T.z + (dz / l) * 6, T.x - (dx / l) * 3, 1.8, T.z - (dz / l) * 3, 1 - Math.exp(-dt * 4));
-      }
+      // primeira pessoa: olho do arremessador olhando para a cesta (no voo o olhar sobe um pouco atrás da bola)
+      const dx = -T.x, dz = HZ - T.z, l = Math.hypot(dx, dz) || 1, ly = T.st === 'fly' && !T.over ? U.clamp(2.6 + (B.y - 2.6) * 0.45, 2.3, 4.6) : 2.6;
+      GFX.setFov(58); GFX.cam(T.x + (dx / l) * 0.1, 1.75, T.z + (dz / l) * 0.1, 0, ly, HZ, 1 - Math.exp(-dt * 7));
       GFX.setRing(GFX.passRing, false);
     }
     GFX.floor(fl);
     GFX.animate(model, mode, speed, dt, T.dph);
     model.g.position.set(T.x, T.y, T.z); model.g.rotation.y = T.rot;
-    GFX.setRing(GFX.userRing, T.kind !== 'ft', T.x, T.z);
-    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z); bm.rotation.x += dt * 5;
+    model.g.visible = T.kind === 'cones';                  // nos arremessos a câmera é o próprio jogador
+    GFX.setRing(GFX.userRing, T.kind === 'cones', T.x, T.z);
+    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z); if (!ShotFeedback.spinning) bm.rotation.x += dt * 5;
   }
   function stop() {
     T.on = false; GFX.disposeModel(model); model = null; GFX.setCones([]); cones = [];
     GFX.setArrow(false); GFX.traj([]); GFX.floor([]); GFX.setRing(GFX.userRing, false); GFX.setRing(GFX.passRing, false);
-    HUD.ftShow(false); HUD.aimLabel(false);
+    if (BallController.active && BallController.session.owner === 'train') BallController.end();
+    ShotFeedback.clear();
   }
-  return { start, update, stop, ftInput, ftBall, finish, INFO, get state() { return T; } };
+  return { start, update, stop, finish, INFO, get state() { return T; } };
 })();

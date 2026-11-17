@@ -136,8 +136,6 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
 #goals div { background: rgba(10, 15, 36, .8); border-radius: .4em; padding: .1em .45em; font-size: .68em; } #goals div.ok { background: #1f8f33; }
 #mystats { position: absolute; top: 6.5em; left: .6em; font-size: .72em; background: rgba(10, 15, 36, .7); border-radius: .4em; padding: .15em .5em; pointer-events: none !important; }
 #hint { position: absolute; left: 0; right: 0; bottom: 12.5em; text-align: center; font-size: .95em; color: var(--yellow); pointer-events: none !important; }
-#aimlbl { position: absolute; transform: translate(-50%, -100%); font-size: 1.5em; color: var(--yellow); pointer-events: none !important; white-space: nowrap; }
-#aimlbl.good { color: #6dff5c; font-size: 1.8em; }
 .act { position: absolute; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .72em; line-height: 1.05;
   background: radial-gradient(circle at 35% 30%, #5d7bff, var(--blue) 60%); box-shadow: 0 .3em 0 var(--blue2), 0 .5em .6em rgba(0, 0, 0, .4); border: .15em solid rgba(255, 255, 255, .85); touch-action: none; }
 .act i { font-style: normal; font-size: 2em; line-height: 1; } .act:active { transform: translateY(.2em) scale(.96); }
@@ -157,12 +155,29 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
 @keyframes pulse { to { transform: translateX(-50%) scale(1.07); } }
 #replay { transform: none; } @keyframes blink { 50% { opacity: .4; } } #replay { animation: blink .8s infinite; }
 
-/* lance livre em primeira pessoa: alvo verde que passeia sobre a bola + ponto de contato */
-#ftui { position: absolute; inset: 0; touch-action: none; } #ftui .t { position: absolute; top: 5.2em; left: 0; right: 0; text-align: center; font-size: 1.4em; pointer-events: none; }
-#ftui .tip { position: absolute; bottom: 2.2em; left: 0; right: 0; text-align: center; font-size: 1.05em; color: var(--yellow); pointer-events: none; }
-#ft-ring { position: absolute; display: none; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; border: .22em solid #6dff5c; background: rgba(109, 255, 92, .28); box-shadow: 0 0 0 .12em rgba(10, 15, 36, .85), 0 0 .8em #6dff5c; }
-#ft-ring::after { content: ''; position: absolute; left: 50%; top: 50%; width: .3em; height: .3em; margin: -.15em; border-radius: 50%; background: #fff; }
-#ft-dot { position: absolute; display: none; width: 1.2em; height: 1.2em; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; background: #fff; border: .22em solid var(--ink); }
+/* arremesso por gesto (ShotFeedback): círculo-alvo no aro, seta de força, avisos e botões da mira */
+#shotui { position: absolute; inset: 0; pointer-events: none !important; }
+#shotui > button { pointer-events: auto; position: absolute; bottom: 1em; }
+#sw-cancel { left: .7em; } #sw-pass { right: .7em; }
+#sw-t { position: absolute; top: 5.4em; left: 0; right: 0; text-align: center; font-size: 1.3em; }
+#sw-tip { position: absolute; top: 10.4em; left: 1em; right: 1em; text-align: center; font-size: .95em; color: var(--yellow); }
+#sw-tip.bad { color: #ff9c8c; }
+#sw-ring { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); border: .14em solid rgba(255, 255, 255, .85); box-shadow: 0 0 0 .07em rgba(10, 15, 36, .55), inset 0 0 0 .07em rgba(10, 15, 36, .55); }
+#sw-in { position: absolute; inset: -.14em; border-radius: 50%; border: .3em solid #fff; box-shadow: 0 0 .6em currentColor, inset 0 0 .5em currentColor; }
+#sw-arrow { position: absolute; left: 0; top: 0; width: 0; height: 0; filter: drop-shadow(0 0 .1em var(--ink)) drop-shadow(0 .12em .1em rgba(0, 0, 0, .55)); }
+#sw-track { position: absolute; left: -.16em; bottom: 0; width: .32em; border-radius: .16em; opacity: .75; }
+#sw-shaft { position: absolute; left: -.5em; bottom: 0; width: 1em; border-radius: .15em .15em .3em .3em; }
+#sw-head { position: absolute; left: -1.05em; width: 0; height: 0; border-left: 1.05em solid transparent; border-right: 1.05em solid transparent; border-bottom: 1.5em solid #fff; }
+#sw-lbl { position: absolute; transform: translate(-50%, -50%); font-size: 1.15em; white-space: nowrap; }
+#sw-spin { position: absolute; transform: translate(-50%, -50%); font-size: 1.05em; color: #7fe9ff; white-space: nowrap; animation: blink .5s infinite; }
+#sw-q { position: absolute; left: 0; right: 0; top: 38%; text-align: center; pointer-events: none !important; z-index: 6; opacity: 0; font-size: 2.7em; line-height: 1; color: #7fe9ff; transform: rotate(-3deg); }
+#sw-q.go { animation: pop 1.5s both; }
+#sw-q.nice { color: #7fd4ff; } #sw-q.great { color: #7dff6a; } #sw-q.excellent { color: var(--yellow); }
+#sw-q small { display: block; font-size: .5em; color: #7fe9ff; margin-top: .2em; }
+/* tela "Ajustar arremesso" */
+.tune { background: #17214d; border-radius: .5em; padding: .35em .6em .2em; margin-bottom: .4em; }
+.tune label { display: flex; justify-content: space-between; font-size: .85em; } .tune b { font-weight: 400; color: var(--yellow); }
+.tune input { width: 100%; margin: .1em 0 0; accent-color: var(--yellow); touch-action: pan-x; }
 /* barra do treino */
 #trainbar { position: absolute; top: max(.6em, env(safe-area-inset-top)); left: .6em; right: .6em; display: flex; align-items: center; gap: .6em; background: rgba(10, 15, 36, .9); border-radius: .6em; padding: .4em .6em; }
 #trainbar b { font-weight: 400; color: var(--yellow); font-size: 1.5em; } #trainbar span { flex: 1; font-size: .9em; }

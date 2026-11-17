@@ -149,8 +149,6 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
 #goals div { background: rgba(10, 15, 36, .8); border-radius: .4em; padding: .1em .45em; font-size: .68em; } #goals div.ok { background: #1f8f33; }
 #mystats { position: absolute; top: 6.5em; left: .6em; font-size: .72em; background: rgba(10, 15, 36, .7); border-radius: .4em; padding: .15em .5em; pointer-events: none !important; }
 #hint { position: absolute; left: 0; right: 0; bottom: 12.5em; text-align: center; font-size: .95em; color: var(--yellow); pointer-events: none !important; }
-#aimlbl { position: absolute; transform: translate(-50%, -100%); font-size: 1.5em; color: var(--yellow); pointer-events: none !important; white-space: nowrap; }
-#aimlbl.good { color: #6dff5c; font-size: 1.8em; }
 .act { position: absolute; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .72em; line-height: 1.05;
   background: radial-gradient(circle at 35% 30%, #5d7bff, var(--blue) 60%); box-shadow: 0 .3em 0 var(--blue2), 0 .5em .6em rgba(0, 0, 0, .4); border: .15em solid rgba(255, 255, 255, .85); touch-action: none; }
 .act i { font-style: normal; font-size: 2em; line-height: 1; } .act:active { transform: translateY(.2em) scale(.96); }
@@ -170,12 +168,29 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
 @keyframes pulse { to { transform: translateX(-50%) scale(1.07); } }
 #replay { transform: none; } @keyframes blink { 50% { opacity: .4; } } #replay { animation: blink .8s infinite; }
 
-/* lance livre em primeira pessoa: alvo verde que passeia sobre a bola + ponto de contato */
-#ftui { position: absolute; inset: 0; touch-action: none; } #ftui .t { position: absolute; top: 5.2em; left: 0; right: 0; text-align: center; font-size: 1.4em; pointer-events: none; }
-#ftui .tip { position: absolute; bottom: 2.2em; left: 0; right: 0; text-align: center; font-size: 1.05em; color: var(--yellow); pointer-events: none; }
-#ft-ring { position: absolute; display: none; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; border: .22em solid #6dff5c; background: rgba(109, 255, 92, .28); box-shadow: 0 0 0 .12em rgba(10, 15, 36, .85), 0 0 .8em #6dff5c; }
-#ft-ring::after { content: ''; position: absolute; left: 50%; top: 50%; width: .3em; height: .3em; margin: -.15em; border-radius: 50%; background: #fff; }
-#ft-dot { position: absolute; display: none; width: 1.2em; height: 1.2em; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; background: #fff; border: .22em solid var(--ink); }
+/* arremesso por gesto (ShotFeedback): círculo-alvo no aro, seta de força, avisos e botões da mira */
+#shotui { position: absolute; inset: 0; pointer-events: none !important; }
+#shotui > button { pointer-events: auto; position: absolute; bottom: 1em; }
+#sw-cancel { left: .7em; } #sw-pass { right: .7em; }
+#sw-t { position: absolute; top: 5.4em; left: 0; right: 0; text-align: center; font-size: 1.3em; }
+#sw-tip { position: absolute; top: 10.4em; left: 1em; right: 1em; text-align: center; font-size: .95em; color: var(--yellow); }
+#sw-tip.bad { color: #ff9c8c; }
+#sw-ring { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); border: .14em solid rgba(255, 255, 255, .85); box-shadow: 0 0 0 .07em rgba(10, 15, 36, .55), inset 0 0 0 .07em rgba(10, 15, 36, .55); }
+#sw-in { position: absolute; inset: -.14em; border-radius: 50%; border: .3em solid #fff; box-shadow: 0 0 .6em currentColor, inset 0 0 .5em currentColor; }
+#sw-arrow { position: absolute; left: 0; top: 0; width: 0; height: 0; filter: drop-shadow(0 0 .1em var(--ink)) drop-shadow(0 .12em .1em rgba(0, 0, 0, .55)); }
+#sw-track { position: absolute; left: -.16em; bottom: 0; width: .32em; border-radius: .16em; opacity: .75; }
+#sw-shaft { position: absolute; left: -.5em; bottom: 0; width: 1em; border-radius: .15em .15em .3em .3em; }
+#sw-head { position: absolute; left: -1.05em; width: 0; height: 0; border-left: 1.05em solid transparent; border-right: 1.05em solid transparent; border-bottom: 1.5em solid #fff; }
+#sw-lbl { position: absolute; transform: translate(-50%, -50%); font-size: 1.15em; white-space: nowrap; }
+#sw-spin { position: absolute; transform: translate(-50%, -50%); font-size: 1.05em; color: #7fe9ff; white-space: nowrap; animation: blink .5s infinite; }
+#sw-q { position: absolute; left: 0; right: 0; top: 38%; text-align: center; pointer-events: none !important; z-index: 6; opacity: 0; font-size: 2.7em; line-height: 1; color: #7fe9ff; transform: rotate(-3deg); }
+#sw-q.go { animation: pop 1.5s both; }
+#sw-q.nice { color: #7fd4ff; } #sw-q.great { color: #7dff6a; } #sw-q.excellent { color: var(--yellow); }
+#sw-q small { display: block; font-size: .5em; color: #7fe9ff; margin-top: .2em; }
+/* tela "Ajustar arremesso" */
+.tune { background: #17214d; border-radius: .5em; padding: .35em .6em .2em; margin-bottom: .4em; }
+.tune label { display: flex; justify-content: space-between; font-size: .85em; } .tune b { font-weight: 400; color: var(--yellow); }
+.tune input { width: 100%; margin: .1em 0 0; accent-color: var(--yellow); touch-action: pan-x; }
 /* barra do treino */
 #trainbar { position: absolute; top: max(.6em, env(safe-area-inset-top)); left: .6em; right: .6em; display: flex; align-items: center; gap: .6em; background: rgba(10, 15, 36, .9); border-radius: .6em; padding: .4em .6em; }
 #trainbar b { font-weight: 400; color: var(--yellow); font-size: 1.5em; } #trainbar span { flex: 1; font-size: .9em; }
@@ -266,7 +281,6 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
       <div id="trainbar" class="hidden"><b id="tr-score">0</b><span id="tr-msg"></span><button class="sq" id="tr-quit">✕</button></div>
       <div id="joyhint">Arraste aqui<br>para mover</div>
       <div id="hint" class="out"></div>
-      <div id="aimlbl" class="out hidden"></div>
       <button class="act y s1" id="b-shoot"><i>🏀</i>ARREMESSAR</button>
       <button class="act s2" id="b-pass"><i>🤝</i><span>PASSAR</span></button>
       <button class="act s3" id="b-drib"><i>⚡</i><span>DRIBLAR</span></button>
@@ -276,11 +290,18 @@ tr.me { background: rgba(255, 201, 40, .22); } th { color: var(--mint); font-siz
       <button class="btn g hidden" id="btn-rew">⏪ RETROCEDER</button>
       <div id="replay" class="hidden">● REPLAY</div>
       <button id="skiprep" class="hidden" aria-label="Pular replay"></button>
-      <div id="ftui" class="hidden">
-        <div class="t out" id="ft-t">LANCE LIVRE</div>
-        <div id="ft-ring"></div><div id="ft-dot"></div>
-        <div class="tip out" id="ft-tip">Toque na bola em cima do alvo verde</div>
+      <!-- arremesso por gesto (ShotFeedback): título, círculo-alvo no aro, seta de força e botões da mira -->
+      <div id="shotui" class="hidden">
+        <div class="out" id="sw-t"></div>
+        <div id="sw-ring" class="hidden"><div id="sw-in"></div></div>
+        <div id="sw-arrow" class="hidden"><div id="sw-track"></div><div id="sw-shaft"></div><div id="sw-head"></div></div>
+        <div id="sw-lbl" class="out hidden"></div>
+        <div id="sw-spin" class="out hidden"></div>
+        <div class="out" id="sw-tip"></div>
+        <button class="btn d sm hidden" id="sw-cancel">↩ VOLTAR</button>
+        <button class="btn sm hidden" id="sw-pass">🤝 PASSAR</button>
       </div>
+      <div id="sw-q" class="out"></div>
     </section>
 
     <section id="result" class="hidden"></section>
@@ -441,8 +462,8 @@ const lifeBonus = (k) => LIFE.slice(0, S.lifestyle).reduce((s, l) => s + (l[k] |
 /* ---------- Melhorias (boosters) usadas antes da partida ---------- */
 const BOOST = {
   coin:   { name: 'Arremesso de Moedas', ic: '🪙', cost: 50,  desc: 'Cada cesta sua rende +12 moedas nesta partida.' },
-  slow:   { name: 'Câmera Lenta',        ic: '⏱️', cost: 150, desc: 'O tempo desacelera enquanto você mira o arremesso.' },
-  aim:    { name: 'Linha de Mira',       ic: '🎯', cost: 50,  desc: 'Mostra a trajetória completa até o aro.' },
+  slow:   { name: 'Câmera Lenta',        ic: '⏱️', cost: 150, desc: 'O tempo quase para enquanto você mira o arremesso.' },
+  aim:    { name: 'Linha de Mira',       ic: '🎯', cost: 50,  desc: 'Mostra o arco que a bola vai fazer enquanto você empurra.' },
   nose:   { name: 'Faro de Cesta',       ic: '👟', cost: 200, desc: 'Seus arremessos ficam bem mais precisos.' },
   rewind: { name: 'Retroceder',          ic: '⏪', cost: 200, desc: 'Errou? Volte no tempo e refaça a jogada (1x).' },
 };
@@ -524,7 +545,7 @@ function defaultSave() {
     career: { g: 0, wins: 0, pts: 0, ast: 0, reb: 0, tpm: 0, dunk: 0, def: 0, rate: 0, titles: 0 },
     national: { called: false, played: 0, wins: 0 },
     daily: null, claimed: {}, tutorial: false,
-    settings: { sound: true, music: true, qlen: 120, shadows: true },
+    settings: { sound: true, music: true, qlen: 120, shadows: true, arremesso: {} },   // arremesso: ajustes feitos em "Ajustar arremesso"
   };
 }
 function loadGame() {
@@ -534,6 +555,7 @@ function loadGame() {
   } catch (e) { S = defaultSave(); }
   ensureDaily();
   tickEnergy();
+  aplicarAjustesArremesso();
 }
 function saveGame() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* armazenamento indisponível */ }
@@ -628,6 +650,112 @@ const seasonOver = () => S.season.round >= S.season.schedule.length;
 const natReq = () => ({ pop: S.level >= 6, life: S.lifestyle >= 5, train: S.training.level >= 7 });
 
 /* =====================================================================
+   Arquivo 00a: AJUSTES DO ARREMESSO POR GESTO (o "Inspector" do jogo)
+   Todas as variáveis de ajuste da mecânica de arremesso ficam aqui.
+   - Para mudar o padrão do jogo: edite os valores de ARREMESSO_PADRAO.
+   - Para testar sem mexer no código: no jogo, abra ⚙️ Ajustes >
+     "Ajustar arremesso" (os valores ficam salvos no aparelho).
+   Quem usa: InputSwipe (gesto), ThrowCalculator (física/assistência),
+   BallController (estados da bola) e ShotFeedback (efeitos e interface).
+   ===================================================================== */
+const ARREMESSO_PADRAO = {
+  /* ---------- GESTO (InputSwipe) ---------- */
+  janelaAmostras: 0.10,          // s — quanto do fim do movimento entra no cálculo da velocidade do swipe
+  comprimentoForcaTotal: 0.55,   // fração da ALTURA da tela: empurrão desse tamanho (e rápido) = 100% de força
+  velocidadeMinima: 0.30,        // telas/s para cima — mais lento que isso não é arremesso (a bola cai)
+  velocidadeCheia: 1.50,         // telas/s — a partir daqui a velocidade já dá o aproveitamento máximo
+  fatorSwipeLento: 0.45,         // aproveitamento do empurrão quando ele é lento (1 = não importa a velocidade)
+  forcaMinimaParaLancar: 0.12,   // 0..1 — abaixo disso a bola cai na frente do jogador e volta
+
+  /* ---------- FORÇA (ThrowCalculator) ----------
+     A força da seta (0..100%) vira velocidade assim:
+       velocidade = velocidadeDeReferência × (forcaMinima → forcaMaxima)
+     onde a velocidade de referência é a MENOR velocidade que alcança o aro daquele ponto. */
+  forcaMinima: 0.52,             // multiplicador com a seta em 0%
+  forcaMaxima: 1.42,             // multiplicador com a seta em 100% (limite para não haver arremesso absurdo)
+  suavidadeForca: 0.50,          // 0 = força linear · maior = o meio da seta fica mais "macio" (zona ideal mais larga)
+
+  /* ---------- DIREÇÃO ---------- */
+  sensibilidadeHorizontal: 0.30, // quanto o desvio lateral do swipe vira a bola (0 = sempre reto)
+  zonaReta: 0.06,                // rad — swipes quase retos contam como retos
+
+  /* ---------- ASSISTÊNCIA DE MIRA ----------
+     0 = só o vetor do jogador · 1 = sempre o arremesso ideal para a força aplicada.
+     A assistência corrige ÂNGULO e DIREÇÃO; a força aplicada é sempre a da seta. */
+  assistencia: 0.90,
+  bonusBoa: 0.02,                // soma na assistência ao soltar com o círculo "BOA!"
+  bonusOtimo: 0.05,              // idem "ÓTIMO!"
+  bonusExcelente: 0.08,          // idem "EXCELENTE!"
+  assistenciaMaxima: 0.98,
+  anguloExtraJogador: 5,         // graus acima do arco mais econômico no vetor "puro" do jogador
+  arcoMaximoPerto: 76,           // graus — arco mais alto que a assistência aceita perto da cesta
+  arcoMaximoLonge: 66,           // graus — idem de longe
+  toleranciaCurta: 0.05,         // m — até quanto a bola pode cair antes do centro do aro e a seta ainda ser "ideal"
+  toleranciaLonga: 0.12,         // m — idem depois do centro do aro
+
+  /* ---------- CURVA (efeito / curveball) ---------- */
+  forcaCurva: 1.5,               // m/s² de força lateral contínua (efeito Magnus) com giro máximo
+  voltasParaCurva: 0.70,         // voltas do dedo (movimento circular) para a bola começar a girar
+  compensacaoCurva: 0.85,        // 0..1 — quanto o lançamento já sai "contra" a curva sem o jogador precisar mirar
+  bonusCurvaMoedas: 15,          // partida: moedas extras por cesta com curva
+  bonusCurvaPontos: 1,           // treino: pontos extras por cesta com curva
+
+  /* ---------- CÍRCULO-ALVO SOBRE O ARO ---------- */
+  tempoCicloCirculo: 1.4,        // s — tempo de um ciclo completo (grande → pequeno → grande)
+  circuloMinimo: 0.20,           // tamanho do círculo no ponto mais fechado (1 = aberto)
+  limiteExcelente: 0.38,         // soltar com o círculo menor que isso = EXCELENTE
+  limiteOtimo: 0.62,             // ... = ÓTIMO
+  limiteBoa: 0.86,               // ... = BOA
+
+  /* ---------- BOLA NA MÃO (BallController) ---------- */
+  distanciaBola: 0.95,           // m à frente da câmera em primeira pessoa
+  tamanhoBolaNaMao: 0.62,        // tamanho da bola na mão (1 = tamanho real; menor para não tapar a cesta)
+  alturaBola: -0.56,             // posição vertical de descanso na tela (-1 = base, 0 = centro)
+  suavidadeSeguir: 16,           // quanto maior, mais "colada" no dedo a bola fica (lerp)
+  flutuacaoAltura: 0.035,        // amplitude do sobe-e-desce parado (em fração de tela)
+  flutuacaoVelocidade: 2.4,      // velocidade do sobe-e-desce
+  giroParado: 0.7,               // rad/s — giro lento da bola parada
+  tempoReaparecer: 0.45,         // s — a bola nova sobe da base da tela
+  tempoSumirErro: 2.0,           // s — bola que errou quica e some depois desse tempo
+
+  /* ---------- VOO ---------- */
+  giroBackspin: 10,              // rad/s — giro para trás durante o voo
+  rastroPontos: 16,              // tamanho do rastro atrás da bola
+
+  /* ---------- RITMO DA PARTIDA ---------- */
+  tempoMira: 0.45,               // velocidade do jogo enquanto você mira (1 = normal)
+  tempoMiraCameraLenta: 0.15,    // idem com a melhoria "Câmera Lenta"
+
+  /* ---------- TEXTOS ---------- */
+  textoBoa: 'BOA!', textoOtimo: 'ÓTIMO!', textoExcelente: 'EXCELENTE!', textoCurva: 'CURVA!',
+};
+
+// Valores em uso (padrão + o que o jogador mudou em Ajustes)
+const ARREMESSO = Object.assign({}, ARREMESSO_PADRAO);
+
+// Controles mostrados na tela "Ajustar arremesso": [chave, rótulo, mínimo, máximo, passo]
+const ARREMESSO_CONTROLES = [
+  ['forcaMinima', 'Força mínima', 0.3, 0.9, 0.01],
+  ['forcaMaxima', 'Força máxima', 1.1, 2.0, 0.01],
+  ['suavidadeForca', 'Tolerância da força', 0, 0.8, 0.01],
+  ['comprimentoForcaTotal', 'Tamanho do swipe p/ 100%', 0.25, 0.8, 0.01],
+  ['sensibilidadeHorizontal', 'Sensibilidade horizontal', 0, 1, 0.01],
+  ['assistencia', 'Assistência de mira', 0, 1, 0.01],
+  ['forcaCurva', 'Força da curva', 0, 3, 0.1],
+  ['compensacaoCurva', 'Compensação da curva', 0, 1, 0.01],
+  ['tempoCicloCirculo', 'Ciclo do círculo (s)', 0.6, 3, 0.05],
+  ['tempoMira', 'Tempo ao mirar (1 = normal)', 0.1, 1, 0.01],
+];
+
+// aplica os ajustes salvos por cima do padrão (chamado ao carregar o jogo e ao mexer nos controles)
+function aplicarAjustesArremesso() {
+  Object.assign(ARREMESSO, ARREMESSO_PADRAO);
+  const o = (S && S.settings && S.settings.arremesso) || {};
+  for (const k in o) if (k in ARREMESSO_PADRAO && typeof o[k] === typeof ARREMESSO_PADRAO[k]) ARREMESSO[k] = o[k];
+  if (ARREMESSO.forcaMaxima < ARREMESSO.forcaMinima + 0.2) ARREMESSO.forcaMaxima = ARREMESSO.forcaMinima + 0.2;
+}
+
+/* =====================================================================
    Arquivo 01: áudio — tudo sintetizado com a Web Audio API
    (quique, swish, aro, tabela, apito, buzina, torcida, moedas, música)
    ===================================================================== */
@@ -695,6 +823,14 @@ const SND = (() => {
     win: (v) => { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone('square', f, f, 0.2, 0.12 * v, i * 0.13)); },
     lose: (v) => { [392, 349, 311, 262].forEach((f, i) => tone('triangle', f, f, 0.3, 0.2 * v, i * 0.2)); },
     error: (v) => { tone('sawtooth', 200, 120, 0.2, 0.15 * v); },
+    // arremesso por gesto: pegar a bola, lançar, bola girando (curva), bola fraca e precisão do círculo
+    grab: (v) => { tone('sine', 420, 640, 0.06, 0.12 * v); },
+    whoosh: (v) => { noise(700, 2600, 0.2, 0.3 * v, 1.4); },
+    spin: (v) => { tone('sawtooth', 300, 900, 0.22, 0.05 * v); noise(2500, 5000, 0.2, 0.08 * v, 3); },
+    drop: (v) => { tone('sine', 300, 140, 0.18, 0.2 * v); },
+    nice: (v) => { [784, 988].forEach((f, i) => tone('triangle', f, f, 0.14, 0.2 * v, i * 0.07)); },
+    great: (v) => { [784, 988, 1175].forEach((f, i) => tone('triangle', f, f, 0.15, 0.2 * v, i * 0.07)); },
+    excellent: (v) => { [784, 988, 1175, 1568].forEach((f, i) => tone('triangle', f, f, 0.18, 0.22 * v, i * 0.07)); tone('square', 2093, 2093, 0.25, 0.05 * v, 0.28); },
     levelup: (v) => { [523, 784, 1047, 1568].forEach((f, i) => tone('triangle', f, f, 0.22, 0.2 * v, i * 0.09)); },
   };
   function play(name, vol = 1) { if (on() && FX[name]) FX[name](vol); }
@@ -1082,7 +1218,7 @@ const GFX = (() => {
   }
 
   /* ---------- bola ---------- */
-  let ball, ballShadowless;
+  let ball, ball2, glow, trail;
   function buildBall() {
     const t = canvasTex(128, 64, (g) => {
       g.fillStyle = '#ee7a23'; g.fillRect(0, 0, 128, 64);
@@ -1093,7 +1229,24 @@ const GFX = (() => {
     }, 'ball');
     ball = new THREE.Mesh(new THREE.SphereGeometry(CT.BALL_R, 12, 9), new THREE.MeshLambertMaterial({ map: t }));
     ball.castShadow = true; scene.add(ball);
+    // segunda bola: a que acabou de ser arremessada continua quicando enquanto a nova já aparece na mão
+    ball2 = new THREE.Mesh(ball.geometry, ball.material); ball2.castShadow = true; ball2.visible = false; scene.add(ball2);
+    // brilho da bola com efeito (curva) e rastro do voo
+    glow = new THREE.Mesh(new THREE.SphereGeometry(CT.BALL_R * 1.45, 14, 10),
+      new THREE.MeshBasicMaterial({ color: 0x6fe3ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+    glow.visible = false; scene.add(glow);
+    trail = new THREE.InstancedMesh(new THREE.SphereGeometry(CT.BALL_R * 0.85, 8, 6),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.34, depthWrite: false }), 32);
+    trail.count = 0; trail.frustumCulled = false; scene.add(trail);
   }
+  // brilho em volta da bola (k = 0 desliga · 1 = máximo)
+  function setGlow(k, color) {
+    glow.visible = k > 0.01; if (!glow.visible) return;
+    glow.position.copy(ball.position); glow.material.color.setHex(color); glow.material.opacity = 0.1 + 0.16 * k;
+    glow.scale.setScalar(ball.scale.x * (0.95 + 0.07 * Math.sin(time * 16) + 0.1 * k));
+  }
+  // rastro: lista de [x, y, z, escala], do ponto mais novo para o mais antigo
+  function setTrail(pts, color = 0xffffff) { trail.material.color.setHex(color); setDots(trail, pts); }
 
   /* ---------- marcadores: seta de força, pontilhados, anéis, estrela ---------- */
   let arrow, arrowBody, arrowHead, trajDots, floorDots, userRing, manRing, passRing, star, cones = [];
@@ -1225,6 +1378,7 @@ const GFX = (() => {
     init, resize, render, update, cam, project, paintCourt, setBoard, makeModel, disposeModel, animate, applyPose, POSE_KEYS,
     setArrow, setRing, setCones, burst, hoops,
     traj: (pts) => setDots(trajDots, pts), floor: (pts) => setDots(floorDots, pts),
+    setGlow, setTrail, get ball2() { return ball2; },
     get ball() { return ball; }, get star() { return star; }, get userRing() { return userRing; }, get manRing() { return manRing; }, get passRing() { return passRing; },
     get camera() { return camera; }, get size() { return { W, H }; },
     hypeUp: (a) => { hype = Math.min(1.2, hype + a); }, shake: (a) => { shakeA = Math.max(shakeA, a); },
@@ -1240,6 +1394,7 @@ const GFX = (() => {
    - Match: regras (24s, 8s, volta de quadra, 3s, andada, drible duplo,
      fora, faltas, bônus, lances livres, tempos técnicos, prorrogação),
      IA de ataque/defesa, controle do jogador, replay e "retroceder".
+   - Arremesso do usuário: SEMPRE pelo gesto de swipe (ver swipeShot).
    Time 0 = time do usuário (ataca a cesta de Z negativo, no alto da tela).
    ===================================================================== */
 
@@ -1252,15 +1407,18 @@ const Phys = {
     const c = Math.cos(th), v = Math.sqrt((CT.G * d * d) / (2 * c * c * (d * Math.tan(th) - dh)));
     B.x = x0; B.y = y0; B.z = z0;
     B.vx = (dx / d) * v * c; B.vz = (dz / d) * v * c; B.vy = v * Math.sin(th);
+    B.cax = B.caz = 0;                                  // arremesso comum: sem curva
   },
   // avança a bola; preenche ev = {floor, rim, board, score}
   step(B, dt, ev) {
     const N = 4, h = dt / N, BR = CT.BALL_R;
     for (let i = 0; i < N; i++) {
       const py = B.y;
+      // curva (efeito Magnus): força lateral contínua enquanto a bola não toca em nada
+      if (B.cax || B.caz) { B.vx += B.cax * h; B.vz += B.caz * h; }
       B.vy -= CT.G * h; B.x += B.vx * h; B.y += B.vy * h; B.z += B.vz * h;
       if (B.y < BR) {                                   // piso
-        B.y = BR;
+        B.y = BR; B.cax = B.caz = 0;
         if (B.vy < 0) {
           if (B.vy < -1.3) ev.floor = Math.min(1, -B.vy / 6);
           B.vy = -B.vy * 0.68; B.vx *= 0.88; B.vz *= 0.88;
@@ -1272,7 +1430,7 @@ const Phys = {
         if (zc < 9) continue;
         // tabela (1,80 x 1,05 m)
         if (Math.abs(B.x) < 0.94 && B.y > 2.86 && B.y < 3.99 && zc > CT.BOARD_Z - BR && zc < CT.BOARD_Z + 0.08 && e * B.vz > 0) {
-          B.z = e * (CT.BOARD_Z - BR); B.vz = -B.vz * 0.6; B.vx *= 0.9; ev.board = true;
+          B.z = e * (CT.BOARD_Z - BR); B.vz = -B.vz * 0.6; B.vx *= 0.9; ev.board = true; B.cax = B.caz = 0;
         }
         // aro: ponto mais próximo no círculo
         const dxr = B.x, dzr = B.z - cz, rh = Math.hypot(dxr, dzr);
@@ -1286,7 +1444,7 @@ const Phys = {
             if (vn < 0) {
               // aro "macio": restituição baixa + atrito, para a bola quicar no aro e ainda poder cair
               B.vx -= 1.4 * vn * nx; B.vy -= 1.4 * vn * ny; B.vz -= 1.4 * vn * nz;
-              B.vx *= 0.94; B.vz *= 0.94; ev.rim = Math.min(1, -vn / 4);
+              B.vx *= 0.94; B.vz *= 0.94; ev.rim = Math.min(1, -vn / 4); B.cax = B.caz = 0;
               // bola por cima do aro: o giro para trás puxa de leve para dentro da cesta
               if (ny > 0.25 && rh < CT.RIM_R + 0.06) { B.vx -= (dxr / rh) * 0.32; B.vz -= (dzr / rh) * 0.32; }
             }
@@ -1301,41 +1459,10 @@ const Phys = {
 };
 
 
-/* Desenha a mira do arremesso: seta amarela de força, cone pontilhado e arco da
-   trajetória (completo apenas com a melhoria "Linha de Mira"). Usado na partida e no treino. */
-// Erro de mira do jogador: zona "perfeita" de ±4% na força e ±0,06 rad na direção;
-// fora dela o erro cresce de forma contínua (em metros no aro).
-function aimErr(a, d) {
-  const e = a.p - 1, ee = Math.sign(e) * Math.max(0, Math.abs(e) - 0.04), dv = Math.sign(a.dev) * Math.max(0, Math.abs(a.dev) - 0.06);
-  return { long: U.clamp(ee * d * 0.5, -1.8, 1.8), lat: d * Math.tan(dv * 0.3), good: ee === 0, perfect: ee === 0 && dv === 0 };
-}
-function aimViz(x, z, hp, a, full, fl) {
-  const hx = 0, hz = -CT.HOOP_Z, d = U.dist(x, z, hx, hz), base = Math.atan2(hx - x, hz - z), ang = base - a.dev;
-  const E = aimErr(a, d), good = E.good, long = E.long, lat = E.lat;
-  GFX.setArrow(true, x, z, ang, 0.4 + a.p * 2.2, good ? 0x49e04b : a.p > 1.12 ? 0xff5a3c : 0xffd400);
-  for (const s of [-1, 1]) for (let i = 1; i < 12; i++) { const r = 0.7 + i * 0.5, aa = base + s * 0.42; fl.push([x + Math.sin(aa) * r, 0.04, z + Math.cos(aa) * r, 0.9]); }
-  let ux = hx - hp.x, uz = hz - hp.z; const l = Math.hypot(ux, uz) || 1; ux /= l; uz /= l;
-  const tx = hx + ux * long - uz * lat, tz = hz + uz * long + ux * lat, T = {};
-  Phys.launch(T, hp.x, hp.y, hp.z, tx, CT.HOOP_Y, tz, (U.clamp(62 - d * 1.9, 47, 62) * Math.PI) / 180);
-  const tt = Math.hypot(tx - T.x, tz - T.z) / Math.hypot(T.vx, T.vz), pts = [], n = full ? 22 : 9;
-  for (let i = 1; i <= n; i++) { const t = (i / 22) * tt; pts.push([T.x + T.vx * t, T.y + T.vy * t - 0.5 * CT.G * t * t, T.z + T.vz * t, full && i === 22 ? 2 : 1]); }
-  GFX.traj(pts);
-  const sp = GFX.project(x + Math.sin(ang) * (1.4 + a.p * 2.2), 0.6, z + Math.cos(ang) * (1.4 + a.p * 2.2));
-  return { x: sp.x, y: sp.y, good, long, lat };
-}
-/* ---- Lance livre em primeira pessoa ----
-   A bola fica grande à frente da câmera. O jogador toca num ponto dela; o desvio (du, dv)
-   entre o toque e o "alvo verde" (em raios da bola) define o chute, e a física faz o resto:
-   - tocar à esquerda manda a bola para a direita (e vice-versa);
-   - tocar mais embaixo dá mais força/altura (bola longa); mais em cima, bola curta. */
-const ftZone = () => 0.2 + S.training.level * 0.007;       // raio do alvo verde (cresce com o treino)
-const FT_BALL = { ahead: 1.1, y: 1.69 };                  // posição da bola à frente do arremessador
-function ftVel(bx, by, bz, hx, hz, du, dv, rz) {
-  if (Math.hypot(du, dv) < rz) { du *= 0.15; dv *= 0.15; }   // dentro do alvo: quase perfeito
-  const T = {}; Phys.launch(T, bx, by, bz, hx, CT.HOOP_Y, hz, 1.15);
-  const v0 = Math.hypot(T.vx, T.vy, T.vz), sp = v0 * (1.004 - dv * 0.075), yaw = Math.atan2(T.vx, T.vz) + du * 0.2 * (hz < 0 ? 1 : -1), th = Math.asin(T.vy / v0);
-  return { vx: Math.sin(yaw) * Math.cos(th) * sp, vy: Math.sin(th) * sp, vz: Math.cos(yaw) * Math.cos(th) * sp };
-}
+/* O arremesso do usuário é sempre feito pelo gesto de swipe em primeira pessoa
+   (InputSwipe -> BallController -> ThrowCalculator). Aqui só fica a altura padrão
+   da bola do lance livre antes de o BallController assumir. */
+const FT_BALL = { ahead: 0.95, y: 1.45 };
 
 /* ---------------- Motor da partida ---------------- */
 const Match = (() => {
@@ -1428,19 +1555,19 @@ const Match = (() => {
       score: [0, 0], tf: [0, 0], to: [2, 2], poss: -1, arrow: 0, front: false, backT: 0, scOff: false, clockHold: true,
       time: 0, ts: 1, headless: !!cfg.headless, auto: !!cfg.auto, paused: false, pf: null, ft: null, inb: null,
       run: { team: -1, pts: 0 }, boostT: [0, 0], boost: cfg.boost || {}, rewindLeft: cfg.boost && cfg.boost.rewind ? 1 : 0,
-      snapStr: null, rewT: 0, userShot: false, coins: 0, ftCamT: 0, ftCamX: 0, ftCamZ: 0, callT: 0, passTgt: -1, aim: { on: false, p: 0, dev: 0 },
+      snapStr: null, rewT: 0, userShot: false, coins: 0, fpT: 0, fpX: 0, fpZ: 0, callT: 0, passTgt: -1, aim: { on: false, run: false },
       userOut: false, userFinal: null, replay: false, replayIn: 0, ftIn: null, dbg: {}, ended: false, hint: '',
     });
     P.length = 0;
     mkRoster(0, cfg.t0, cfg); mkRoster(1, cfg.t1, cfg);
-    Object.assign(B, { x: 0, y: 1.3, z: 0, vx: 0, vy: 0, vz: 0, state: 'dead', holder: -1, lastTouch: -1, lastTeam: -1, shooter: -1, pts: 2, rim: false, fromShot: false, ft: false, dunk: false, passTo: -1, passFrom: -1, t: 0, dur: 1, fx: 0, fy: 0, fz: 0, inb: false, safe: false, tried: {}, noGrab: 0, spin: 0 });
+    Object.assign(B, { x: 0, y: 1.3, z: 0, vx: 0, vy: 0, vz: 0, state: 'dead', holder: -1, lastTouch: -1, lastTeam: -1, shooter: -1, pts: 2, rim: false, fromShot: false, ft: false, dunk: false, passTo: -1, passFrom: -1, t: 0, dur: 1, fx: 0, fy: 0, fz: 0, inb: false, safe: false, tried: {}, noGrab: 0, spin: 0, cax: 0, caz: 0, sw: null });
     if (!M.headless) {
       MODELS.forEach(GFX.disposeModel); MODELS = P.map((p) => GFX.makeModel(p.look));
       GFX.disposeModel(REF); REF = GFX.makeModel({ skin: 1, hair: 1, hairColor: 1, face: 1, shoes: 1, num: '', c1: 0x9aa3b0, c2: 0x222222, short: 0x222222 });
       GFX.paintCourt(cfg.t0.c1, cfg.t0.c2);
       REC.n = 0; REC.i = 0;
     }
-    setTipPositions();
+    setTipPositions(); swKey = null;
   }
   function setTipPositions() {
     const T = [[0, 5.5], [-3.6, 2.4], [3.6, 2.4], [-2.4, -2.2], [0, 0.6]];
@@ -1452,7 +1579,8 @@ const Match = (() => {
     const same = M.poss === p.team, wasShot = B.fromShot, rim = B.rim, pf = B.passFrom, lastTeam = B.lastTeam;
     if (M.userShot) { M.userShot = false; if (M.snapStr && !(p.isUser && how === 'reb')) M.rewT = 3; }
     B.state = 'held'; B.holder = p.id; B.lastTouch = p.id; B.lastTeam = p.team; B.fromShot = false; B.shooter = -1;
-    B.vx = B.vy = B.vz = 0; B.safe = false; B.dunk = false; B.ft = false;
+    B.vx = B.vy = B.vz = 0; B.safe = false; B.dunk = false; B.ft = false; B.cax = B.caz = 0; B.sw = null;
+    M.fpT = Math.min(M.fpT, 0.15);
     p.drib = 'live'; p.travelD = 0; p.holdT = 0; p.aiT = U.rand(0.25, 0.5); p.drive = 0;
     M.clockHold = false;
     if (how === 'reb') { p.reb++; snd('pass', 0.8); }
@@ -1634,8 +1762,9 @@ const Match = (() => {
       }
     }
     if (M.run.team === team) M.run.pts += pts; else M.run = { team, pts };
-    const dunk = B.dunk, ft = B.ft, rimIn = B.rim && !dunk;
-    B.state = 'drop'; B.vx *= 0.3; B.vz *= 0.3; B.vy = Math.max(B.vy, -3.2);
+    const dunk = B.dunk, ft = B.ft, rimIn = B.rim && !dunk, sw = sh && sh.isUser ? B.sw : null;
+    B.state = 'drop'; B.vx *= 0.3; B.vz *= 0.3; B.vy = Math.max(B.vy, -3.2); B.sw = null; B.cax = B.caz = 0;
+    M.fpT = Math.min(M.fpT, 0.75);                         // fica um instante em 1ª pessoa para ver a rede balançar
     if (!M.headless) {
       const hp = GFX.hoops[team]; hp.kick(B.vx, B.vz, dunk ? 1.6 : 1);
       SND.play('swish'); SND.cheer(team === 0 ? 1 : 0.45); GFX.hypeUp(team === 0 ? 0.9 : 0.3);
@@ -1643,6 +1772,11 @@ const Match = (() => {
       GFX.burst(hp.x, CT.HOOP_Y - 0.3, hp.z, [t.c1, t.c2, 0xffffff, 0xffd400], dunk || pts === 3 ? 44 : 22, dunk ? 6 : 4);
       if (!ft) fx('banner', dunk ? 'ENTERRADA!' : pts === 3 ? '3 PONTOS!' : 'CESTA!', (rimIn ? 'No aro... e caiu! · ' : '') + (sh ? (sh.isUser ? 'VOCÊ' : sh.name) + ` · ${sh.pts} pts` : ''), team === 0 ? 'good' : 'bad');
       else fx('float', hp.x, CT.HOOP_Y + 0.6, hp.z, rimIn ? 'NO ARO... E CAIU! +1' : '+1', team === 0 ? 'good' : 'bad');
+      // arremesso por gesto: texto pela precisão do círculo e bônus de moedas pela curva
+      if (sw) {
+        ShotFeedback.scored(sw);
+        if (sw.spin && !ft) { M.coins += ARREMESSO.bonusCurvaMoedas; fx('float', hp.x, CT.HOOP_Y + 1.6, hp.z, `+${ARREMESSO.bonusCurvaMoedas} 🪙 CURVA`, 'coin'); }
+      }
       if (sh && sh.isUser && M.boost.coin && !ft) { M.coins += 12; GFX.burst(hp.x, CT.HOOP_Y, hp.z, [0xffd400, 0xffb300], 16, 3); SND.play('coin'); fx('float', hp.x, CT.HOOP_Y + 1.1, hp.z, '+12 🪙', 'coin'); }
     }
     return { team, sh, pts, dunk };
@@ -1672,7 +1806,7 @@ const Match = (() => {
     M.phase = 'whistle'; M.phT = delay; M.next = next; cancelAim(); snd('whistle'); fx('banner', txt, sub, kind);
     for (const p of P) { if (p.st !== 'free') { p.st = 'free'; p.y = 0; } p.dx = p.dz = 0; p.react = 0; p.drive = 0; }
     if (B.state === 'pass') { B.state = 'loose'; B.vx = B.vy = B.vz = 0; }
-    M.userShot = false;
+    M.userShot = false; M.fpT = 0;
   }
   function sideSpot(x, z) {                              // ponto de reposição mais próximo
     if (Math.abs(z) > CT.HL - 0.5 && Math.abs(x) < CT.HW - 0.5) return { x: U.clamp(Math.abs(x) < 2.6 ? Math.sign(x || 1) * 2.6 : x, -6.5, 6.5), z: Math.sign(z) * (CT.HL + 0.45) };
@@ -1730,7 +1864,7 @@ const Match = (() => {
     else { rx = sx - Math.sign(sx) * 3.6; rz = U.clamp(sz - dirOf(team) * 1.3, -12.5, 12.5); }
     M.inb = { team, sx, sz, ps: ps.id, rc: rc.id, rx, rz };
     for (const p of P) { p.st = 'free'; p.y = 0; p.paintT = 0; p.react = 0; p.cele = 0; p.drive = 0; }
-    B.state = 'held'; B.holder = ps.id; B.fromShot = false; B.shooter = -1; ps.drib = 'hold';
+    B.state = 'held'; B.holder = ps.id; B.fromShot = false; B.shooter = -1; ps.drib = 'hold'; B.cax = B.caz = 0; B.sw = null;
   }
   function updInbound(dt) {
     const I = M.inb, ps = P[I.ps], rc = P[I.rc]; M.phT += dt;
@@ -1770,8 +1904,8 @@ const Match = (() => {
   function ftAfter(s) {
     const f = M.ft;
     Object.assign(B, { state: 'shot', holder: -1, shooter: s.id, pts: 1, rim: false, fromShot: true, ft: true, dunk: false, lastTouch: s.id, lastTeam: s.team, noGrab: 0 });
-    s.fta++; fx('ftShow', false); snd('pass', 0.7);
-    if (isCtl(s)) { M.ftCamT = 1.7; M.ftCamX = s.x; M.ftCamZ = s.z; }      // mantém a visão em 1ª pessoa durante o voo
+    s.fta++; if (!isCtl(s)) snd('pass', 0.7);
+    if (isCtl(s)) { M.fpT = 1.9; M.fpX = s.x; M.fpZ = s.z; }               // mantém a visão em 1ª pessoa durante o voo
     if (f.i === f.n - 1 && M.clock > 0) { M.phase = 'live'; M.scOff = true; M.clockHold = true; M.ft = null; }   // último lance: bola viva no rebote
     else { f.st = 'fly'; f.t = 0; f.scored = false; }
   }
@@ -1781,17 +1915,26 @@ const Match = (() => {
     updStates(dt); movePlayers(dt);
     if (f.st === 'setup') {
       holdBall(dt);
-      if (f.t > 1.7) { const g = f.pos[s.id]; s.x = g.x; s.z = g.z; s.vx = s.vz = 0; s.rot = Math.atan2(h.x - s.x, h.z - s.z); f.st = 'aim'; f.t = 0; M.ftIn = null; if (isCtl(s)) fx('ftShow', true, f.i + 1, f.n); }
+      if (f.t > 1.7) { const g = f.pos[s.id]; s.x = g.x; s.z = g.z; s.vx = s.vz = 0; s.rot = Math.atan2(h.x - s.x, h.z - s.z); f.st = 'aim'; f.t = 0; M.ftIn = null; }
     } else if (f.st === 'aim') {
       if (isCtl(s) && !M.headless) {
-        // usuário: bola parada à frente da câmera esperando o toque
+        // usuário: bola em primeiro plano esperando o gesto de swipe (BallController)
         s.st = 'free'; B.state = 'held'; B.vx = B.vy = B.vz = 0;
-        B.x = s.x; B.y = FT_BALL.y; B.z = s.z + dirOf(s.team) * FT_BALL.ahead;
-        if (M.ftIn || f.t > 14) {
-          const a = M.ftIn || { du: U.rand(-0.5, 0.5), dv: U.rand(-0.5, 0.5) }, rz = ftZone() + (M.boost.nose ? 0.07 : 0);
-          if (Math.hypot(a.du, a.dv) < rz) { snd('perfect'); fx('float', h.x, CT.HOOP_Y + 1.2, h.z, 'PERFEITO!', 'good'); }
-          Object.assign(B, ftVel(B.x, B.y, B.z, h.x, h.z, a.du, a.dv, rz));
+        if (BallController.active) { const q = BallController.pos; B.x = q.x; B.y = q.y; B.z = q.z; }
+        else { B.x = s.x; B.y = FT_BALL.y; B.z = s.z + dirOf(s.team) * FT_BALL.ahead; }
+        if (M.ftIn) {                                     // o swipe lançou a bola: a física faz o resto
+          const L = M.ftIn; M.ftIn = null;
+          Object.assign(B, { x: L.x, y: L.y, z: L.z, vx: L.vx, vy: L.vy, vz: L.vz, cax: L.cax, caz: L.caz, sw: { q: L.quality, spin: L.spin } });
           ftAfter(s);
+        } else if (f.t > 15) {
+          // não existe arremesso automático: quem demora demais perde o lance
+          s.fta++; snd('whistle'); fx('banner', 'TEMPO ESGOTADO', 'Lance livre perdido', 'bad');
+          f.i++;
+          if (f.i >= f.n) {
+            M.ft = null; if (M.clock <= 0) return endPeriod();
+            return inbound(1 - s.team, 3.2, dirOf(s.team) * (CT.HL + 0.45), { sc: 24 });
+          }
+          f.st = 'setup'; f.t = 1.0; B.holder = s.id; s.drib = 'hold';
         }
       } else {
         s.st = 'aim'; holdBall();
@@ -1807,7 +1950,8 @@ const Match = (() => {
       if (f.scored ? f.t > 1.1 : (B.y < 1.2 && f.t > 0.6) || f.t > 3) {
         f.i++;
         if (f.i >= f.n) { M.ft = null; return endPeriod(); }       // só chega aqui com o relógio zerado
-        f.st = 'setup'; f.t = 1.0; B.state = 'held'; B.holder = s.id; s.st = 'free'; s.drib = 'hold';
+        if (isCtl(s) && !M.headless) ShotFeedback.ghostFrom(B, f.scored ? 0.9 : ARREMESSO.tempoSumirErro);   // a bola anterior quica e some
+        f.st = 'setup'; f.t = 1.0; B.state = 'held'; B.holder = s.id; s.st = 'free'; s.drib = 'hold'; B.sw = null; B.cax = B.caz = 0;
       }
     }
   }
@@ -1829,7 +1973,7 @@ const Match = (() => {
     }
   }
   function endPeriod() {
-    snd('buzzer'); cancelAim(); M.ft = null; M.pf = null; fx('ftShow', false);
+    snd('buzzer'); cancelAim(); M.ft = null; M.pf = null; M.fpT = 0;
     for (const p of P) { p.st = 'free'; p.y = 0; p.dx = p.dz = 0; }
     if (M.q >= 4 && M.score[0] !== M.score[1]) { M.phase = 'end'; return finish(); }
     M.phase = 'qbreak';
@@ -2038,7 +2182,7 @@ const Match = (() => {
         startPass(p, q);
       } else if (!has && M.poss === 0) { M.callT = 1.3; fx('float', p.x, 2.4, p.z, 'PASSA!', 'info'); }
     } else if (a === 'layup' && has && p.st === 'free') {
-      const h = hoopOf(0); if (U.dist(p.x, p.z, h.x, h.z) < 4.3) startLay(p);
+      const h = hoopOf(0); if (U.dist(p.x, p.z, h.x, h.z) < 3.6) startLay(p);   // só enterrada: arremesso é sempre por swipe
     } else if (a === 'steal' && !has && p.st === 'free' && p.cd <= 0) {
       p.cd = 1; const hd = B.state === 'held' ? P[B.holder] : null;
       p.st = 'stun'; p.stT = 0; p.stunT = 0.32; p.lunge = true; snd('squeak');
@@ -2048,23 +2192,74 @@ const Match = (() => {
       }
     } else if (a === 'jump' && p.st === 'free') { p.st = 'jump'; p.stT = 0; }
   }
+  /* ---- arremesso por gesto (swipe) ----
+     Todo arremesso do usuário passa por aqui: parado, correndo, de 2, de 3 e lance livre.
+     aimStart() só levanta a bola e abre a mira em primeira pessoa (não lança nada);
+     quem lança é o gesto: BallController -> swipeShot(L). Não há arremesso por botão,
+     clique simples ou automático para o usuário. */
+  let swKey = null;                                         // mira aberta agora: 'live' | 'ft0' | 'ft1'... | null
   function canAim() { const p = user(); return !!p && !M.auto && M.phase === 'live' && !M.paused && B.state === 'held' && B.holder === p.id && p.st === 'free'; }
   function aimStart() {
     if (!canAim()) return false;
     const p = user();
     if (M.rewindLeft > 0) M.snapStr = snap();
-    p.st = 'aim'; p.stT = 0; p.drib = 'dead'; M.aim = { on: true, p: 0, dev: 0 };
-    if (M.boost.slow) M.ts = 0.3;
+    M.aim = { on: true, run: Math.hypot(p.vx, p.vz) > 2.5 };  // arremesso em movimento é um pouco mais difícil
+    p.st = 'aim'; p.stT = 0; p.drib = 'dead';
+    M.ts = M.boost.slow ? ARREMESSO.tempoMiraCameraLenta : ARREMESSO.tempoMira;   // o jogo desacelera enquanto você mira
+    // os marcadores próximos reagem e podem saltar para contestar
+    for (const q of P) if (q.team !== p.team && q.st === 'free' && U.dist(p.x, p.z, q.x, q.z) < 2.2 && Math.random() < 0.3 + 0.45 * q.sk.df) q.react = U.rand(0.12, 0.45);
+    syncSwipe();
     return true;
   }
-  function aimMove(pw, dev) { if (M.aim.on) { M.aim.p = U.clamp(pw, 0, 1.4); M.aim.dev = U.clamp(dev, -0.6, 0.6); } }
-  function aimEnd(cancel) {
-    const p = user(), a = M.aim; if (!a.on) return; a.on = false; M.ts = 1;
-    if (!p || p.st !== 'aim') return;
-    if (cancel || a.p < 0.3) { p.st = 'free'; return; }            // finta: o drible fica "morto"
-    const h = hoopOf(0), d = U.dist(p.x, p.z, h.x, h.z), E = aimErr(a, d);
-    startShot(p, E.long, E.lat);
-    if (E.perfect) { snd('perfect'); fx('float', p.x, 2.7, p.z, 'PERFEITO!', 'good'); }
+  // desistir da mira (finta): a bola continua com você, mas o drible fica "morto"
+  function aimCancel() {
+    const p = user(); if (!M.aim.on) return;
+    cancelAim(); if (p && p.st === 'aim') p.st = 'free';
+  }
+  function swipeWanted() {
+    const u = user(); if (M.headless || M.replay || !u || !isCtl(u)) return null;
+    if (M.phase === 'live' && M.aim.on && u.st === 'aim' && B.state === 'held' && B.holder === u.id) return 'live';
+    if (M.phase === 'ft' && M.ft && M.ft.st === 'aim' && M.ft.s === u.id) return 'ft' + M.ft.i;
+    return null;
+  }
+  // abre/fecha a sessão do BallController conforme o estado da partida
+  function syncSwipe() {
+    const w = CFG ? swipeWanted() : null; if (w === swKey) return;
+    const had = swKey; swKey = w;
+    if (!w) { if (had) BallController.end(); return; }
+    const u = user(), h = hoopOf(u.team), ft = w !== 'live';
+    BallController.start({
+      owner: 'match', hx: h.x, hz: h.z, canCancel: !ft, canPass: !ft,
+      title: ft ? `LANCE LIVRE ${M.ft.i + 1}/${M.ft.n}` : isThree(u.team, u.x, u.z) ? 'ARREMESSO DE 3' : 'ARREMESSO',
+      mods: swipeMods, onThrow: swipeShot, arc: !!M.boost.aim, ball: B, flying: () => B.state === 'shot' && !!B.sw && !B.rim,
+    });
+  }
+  // o que muda a precisão: treino (habilidade), melhorias, tempo técnico, marcação e pressa
+  function swipeMods() {
+    const u = user(), ft = M.phase === 'ft', h = hoopOf(u.team), d = U.dist(u.x, u.z, h.x, h.z);
+    const sk = d > CT.THREE_R - 0.3 ? u.sk.th : u.sk.sh, c = ft ? 0 : contest(u).c;
+    const assist = (sk - 0.6) * 0.1 + (M.boost.nose ? 0.04 : 0) + (M.boostT[u.team] > 0 ? 0.02 : 0) + (ft ? 0.03 : 0) - 0.14 * c - (M.aim.run ? 0.03 : 0);
+    return { assist, noise: 0.004 + 0.02 * c, contest: c };
+  }
+  // o gesto lançou a bola. L vem do ThrowCalculator: posição, velocidade, curva e precisão
+  function swipeShot(L) {
+    const u = user(); if (!u || !swKey) return false;
+    if (M.phase === 'ft') { if (!M.ft || M.ft.st !== 'aim') return false; M.ftIn = L; return true; }
+    if (!M.aim.on || u.st !== 'aim') return false;
+    M.aim.on = false; M.ts = 1;
+    const pts = isThree(u.team, u.x, u.z) ? 3 : 2, C = contest(u);
+    u.st = 'shoot'; u.stT = 0.26; u.sh = { type: 'jump', long: 0, lat: 0, pts, rel: true };
+    M.fpT = 2.8; M.fpX = u.x; M.fpZ = u.z;                 // a câmera acompanha o voo em 1ª pessoa
+    if (defenseAtRelease(u, 'jump', C)) { M.fpT = 0.3; return true; }      // toco!
+    const fouler = foulAtRelease(u, 'jump', C);
+    Object.assign(B, {
+      x: L.x, y: L.y, z: L.z, vx: L.vx, vy: L.vy, vz: L.vz, cax: L.cax, caz: L.caz, sw: { q: L.quality, spin: L.spin },
+      state: 'shot', holder: -1, shooter: u.id, pts, rim: false, fromShot: true, ft: false, dunk: false, lastTouch: u.id, lastTeam: u.team, noGrab: 0,
+    });
+    M.scOff = true; u.fga++; if (pts === 3) u.tpa++;
+    dbg(pts === 3 ? 'fga3' : 'fga2'); M.userShot = true;
+    if (fouler) foul(fouler, u, 'shooting', { pts });
+    return true;
   }
 
   /* ---- movimento, estados, bola ---- */
@@ -2108,7 +2303,11 @@ const Match = (() => {
       }
     }
   }
-  function holdBall() { const p = P[B.holder]; if (!p) return; const hp = heldPos(p); B.x = hp.x; B.y = hp.y; B.z = hp.z; }
+  function holdBall() {
+    const p = P[B.holder]; if (!p) return;
+    if (swKey && p.isUser && BallController.active) { const q = BallController.pos; B.x = q.x; B.y = q.y; B.z = q.z; return; }   // mirando: bola em primeiro plano
+    const hp = heldPos(p); B.x = hp.x; B.y = hp.y; B.z = hp.z;
+  }
   function ballFx(ev) {
     if (M.headless) return;
     if (ev.floor) SND.play('bounce', ev.floor);
@@ -2136,8 +2335,8 @@ const Match = (() => {
     if (B.state === 'shot' || B.state === 'loose' || B.state === 'drop') {
       const ev = {}; Phys.step(B, dt, ev); ballFx(ev);
       if (B.state === 'drop') return;
-      if (ev.rim || ev.board) B.rim = true;
-      if (ev.floor && B.state === 'shot') { B.rim = true; }                       // tocou o chão: bola solta
+      if (ev.rim || ev.board) { B.rim = true; M.fpT = Math.min(M.fpT, 0.6); }
+      if (ev.floor && B.state === 'shot') { B.rim = true; M.fpT = Math.min(M.fpT, 0.3); }   // tocou o chão: bola solta
       if (ev.score !== undefined) { const r = scoreBasket(ev.score); if (M.phase === 'live') afterBasket(r); return; }
       tryGrab();
     }
@@ -2213,6 +2412,7 @@ const Match = (() => {
       case 'inbound': updInbound(dt); break;
       case 'ft': updFT(dt); break;
     }
+    syncSwipe();
   }
 
   /* ---- retroceder (snapshot do estado) ---- */
@@ -2222,7 +2422,7 @@ const Match = (() => {
     const o = JSON.parse(M.snapStr), left = M.rewindLeft - 1;
     for (const k of Object.keys(M)) if (typeof M[k] !== 'function') delete M[k];
     Object.assign(M, o.M); Object.assign(B, o.B); o.P.forEach((d, i) => Object.assign(P[i], d));
-    M.rewindLeft = left; M.snapStr = null; M.rewT = 0; M.next = null; M.replay = false; M.replayIn = 0;
+    M.rewindLeft = left; M.snapStr = null; M.rewT = 0; M.next = null; M.replay = false; M.replayIn = 0; M.fpT = 0;
     fx('banner', 'RETROCEDER!', 'Refaça a jogada', 'info'); snd('levelup');
     return true;
   }
@@ -2266,6 +2466,12 @@ const Match = (() => {
   function sync(dt) {
     if (M.replay || !CFG) return;
     const u = user(), has = (p) => B.state === 'held' && B.holder === p.id;
+    // primeira pessoa: enquanto o usuário mira (partida ou lance livre) e durante o voo do arremesso
+    const ftS = M.phase === 'ft' && M.ft && isCtl(P[M.ft.s]) && (M.ft.st !== 'setup' || M.ft.i > 0) ? P[M.ft.s] : null;
+    const aimS = u && M.aim.on && u.st === 'aim' && isCtl(u) ? u : ftS;
+    if (M.fpT > 0) M.fpT -= dt;
+    if (aimS) { M.fpX = aimS.x; M.fpZ = aimS.z; }
+    const fp = !!aimS || M.fpT > 0;
     for (const p of P) {
       const m = MODELS[p.id], sp = Math.hypot(p.vx, p.vz); let mode = sp > 0.4 ? 'run' : 'idle';
       if (p.cele > 0 && (M.phase === 'scored' || M.phase === 'end')) mode = 'cele';
@@ -2279,6 +2485,8 @@ const Match = (() => {
       else if (M.poss >= 0 && M.poss !== p.team && (M.phase === 'live' || M.phase === 'inbound') && U.dist(p.x, p.z, P[p.man].x, P[p.man].z) < 3.2) mode = 'def';
       GFX.animate(m, mode, sp, dt, p.dph);
       m.g.position.set(p.x, p.y, p.z); m.g.rotation.y = p.rot;
+      // em 1ª pessoa some o próprio jogador e quem estiver colado na câmera (para não tapar a bola e o aro)
+      m.g.visible = !(fp && (p.isUser || U.dist(p.x, p.z, M.fpX, M.fpZ) < 1.3));
     }
     // árbitro acompanha a jogada pela lateral
     REF.tx = U.clamp(B.z + 3, -12, 12);
@@ -2286,31 +2494,26 @@ const Match = (() => {
     GFX.animate(REF, Math.abs(nz - rz) > 0.01 ? 'run' : M.phase === 'whistle' ? 'jump' : 'idle', Math.abs(nz - rz) / Math.max(dt, 1e-3), dt);
     REF.g.position.set(8.1, 0, nz); REF.g.rotation.y = Math.abs(nz - rz) > 0.01 ? (nz > rz ? 0 : Math.PI) : -Math.PI / 2;
     // bola
-    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z); bm.rotation.x += (B.vz + (B.state === 'held' ? 3 : 0)) * dt * 4; bm.rotation.z -= B.vx * dt * 4;
+    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z);
+    if (!ShotFeedback.spinning) { bm.rotation.x += (B.vz + (B.state === 'held' ? 3 : 0)) * dt * 4; bm.rotation.z -= B.vx * dt * 4; }   // no arremesso por gesto o giro é do ShotFeedback
     // marcadores
     const live = M.phase === 'live' || M.phase === 'inbound';
-    GFX.setRing(GFX.userRing, !!u, u ? u.x : 0, u ? u.z : 0);
-    GFX.star.visible = !!u && M.phase !== 'ft'; if (u) GFX.star.position.set(u.x, u.y + 2.25 + Math.sin(GFX.time * 4) * 0.05, u.z);
+    GFX.setRing(GFX.userRing, !!u && !fp, u ? u.x : 0, u ? u.z : 0);
+    GFX.star.visible = !!u && M.phase !== 'ft' && !fp; if (u) GFX.star.position.set(u.x, u.y + 2.25 + Math.sin(GFX.time * 4) * 0.05, u.z);
     const defending = u && live && M.poss === 1, man = u ? P[u.man] : null;
     GFX.setRing(GFX.manRing, !!defending, man ? man.x : 0, man ? man.z : 0);
     const pt = u && has(u) && M.passTgt >= 0 && M.phase === 'live' && !M.auto ? P[M.passTgt] : null;
     GFX.setRing(GFX.passRing, !!pt, pt ? pt.x : 0, pt ? pt.z : 0);
     const fl = [];
     if (pt && !M.aim.on) for (let i = 1; i < 14; i++) { const t = i / 14; fl.push([U.lerp(u.x, pt.x, t), 0.04, U.lerp(u.z, pt.z, t), 1]); }
-    // mira do arremesso: seta de força + cone pontilhado + arco da trajetória
-    if (u && M.aim.on && u.st === 'aim') {
-      const r = aimViz(u.x, u.z, heldPos(u), M.aim, !!M.boost.aim, fl);
-      fx('aimLabel', true, r.x, r.y, Math.round(M.aim.p * 100), r.good, isThree(0, u.x, u.z));
-    } else { GFX.setArrow(false); GFX.traj([]); fx('aimLabel', false); }
     GFX.floor(fl);
-    // câmera isométrica acompanhando a jogada
-    const ftS = M.phase === 'ft' && M.ft && isCtl(P[M.ft.s]) && (M.ft.st !== 'setup' || M.ft.i > 0) ? P[M.ft.s] : null;
-    if (M.ftCamT > 0) M.ftCamT -= dt;
-    if (ftS || M.ftCamT > 0) {                            // lance livre do usuário: visão em primeira pessoa
-      const x = ftS ? ftS.x : M.ftCamX, z = ftS ? ftS.z : M.ftCamZ;
-      GFX.setFov(58); GFX.cam(x, 1.75, z - 0.1, 0, 2.6, -CT.HOOP_Z, 1 - Math.exp(-dt * 7));
+    if (fp) {
+      // olho do arremessador, olhando para a cesta; durante o voo o olhar sobe um pouco atrás da bola
+      const hz = -CT.HOOP_Z, dx = -M.fpX, dz = hz - M.fpZ, l = Math.hypot(dx, dz) || 1;
+      const ly = !aimS && B.state === 'shot' ? U.clamp(2.6 + (B.y - 2.6) * 0.45, 2.3, 4.6) : 2.6;
+      GFX.setFov(58); GFX.cam(M.fpX + (dx / l) * 0.1, 1.75, M.fpZ + (dz / l) * 0.1, 0, ly, hz, 1 - Math.exp(-dt * 7));
     }
-    else {
+    else {                                                // câmera isométrica acompanhando a jogada
       let cx = B.x, cz = B.z;
       if (u) { cx = B.x * 0.55 + u.x * 0.45; cz = B.z * 0.55 + u.z * 0.45; }
       if (M.phase === 'tip' || M.phase === 'intro') { cx = 0; cz = 0; }
@@ -2329,12 +2532,13 @@ const Match = (() => {
     if (live) mode = has ? 'ball' : B.state === 'shot' || B.state === 'loose' ? 'loose' : M.poss === 0 ? 'off' : M.poss === 1 ? 'def' : 'loose';
     const h = hoopOf(0), dh = u ? U.dist(u.x, u.z, h.x, h.z) : 99;
     let hint = '';
-    if (live && has && u.drib === 'dead' && u.st === 'free') hint = '✋ Bola presa! Passe ou arremesse';
+    if (M.aim.on || M.fpT > 0) hint = '';
+    else if (live && has && u.drib === 'dead' && u.st === 'free') hint = '✋ Bola presa! Passe ou arremesse';
     else if (live && u.paintT > 1.5) hint = `⚠️ Garrafão: ${(3 - u.paintT).toFixed(1)}s`;
     else if (live && has && !M.front && M.backT > 4.5) hint = `⚠️ Passe do meio: ${(8 - M.backT).toFixed(0)}s`;
     return {
       phase: M.phase, q: M.q, clock: M.clock, shotClock: M.shotClock, score: M.score, tf: M.tf, to: M.to, poss: M.poss, mode,
-      near: has && dh < 4.3 && u.st === 'free', dunk: has && dh < 3.6, dead: has && u.drib === 'dead', hint, rewind: M.rewT > 0 && M.rewindLeft > 0,
+      aim: !!u && (M.aim.on || M.fpT > 0), dunk: has && dh < 3.6 && u.st === 'free', dead: has && u.drib === 'dead', hint, rewind: M.rewT > 0 && M.rewindLeft > 0,
       stats: userStats(), fouls: u ? u.fouls : 5, userOut: M.userOut, replay: M.replay, paused: M.paused, ended: M.ended,
       goals: (CFG.goals || []).map((g) => Math.min(g.goal, goalVal(g.stat))), boostT: M.boostT[0],
     };
@@ -2347,20 +2551,17 @@ const Match = (() => {
     M.headless = hl; M.auto = au;
   }
   function simulate(cfg) { let r = null; start(Object.assign({ headless: true, auto: true }, cfg), (x) => { r = x; }); fastForward(); return r; }
-  function stop() { MODELS.forEach(GFX.disposeModel); MODELS = []; GFX.disposeModel(REF); REF = null; CFG = null; GFX.setArrow(false); GFX.traj([]); GFX.floor([]); GFX.setRing(GFX.userRing, false); GFX.setRing(GFX.manRing, false); GFX.setRing(GFX.passRing, false); GFX.star.visible = false; }
+  function stop() { if (swKey) { swKey = null; BallController.end(); } ShotFeedback.clear(); MODELS.forEach(GFX.disposeModel); MODELS = []; GFX.disposeModel(REF); REF = null; CFG = null; GFX.setArrow(false); GFX.traj([]); GFX.floor([]); GFX.setRing(GFX.userRing, false); GFX.setRing(GFX.manRing, false); GFX.setRing(GFX.passRing, false); GFX.star.visible = false; }
   function tapPass(sx, sy) {                              // toque num companheiro = passe
     const u = user(); if (!u || !(B.state === 'held' && B.holder === u.id)) return false;
     let best = -1, bd = 70;
-    for (const q of P) if (q.team === 0 && q !== u) { const s = GFX.project(q.x, 1, q.z), d = Math.hypot(s.x - sx, s.y - sy); if (d < bd) { bd = d; best = q.id; } }
+    for (const q of P) if (q.team === 0 && q !== u) { const s = GFX.project(q.x, 1, q.z), d = Math.hypot(s.x - sx, s.y - sy); if (s.vis && d < bd) { bd = d; best = q.id; } }
     if (best >= 0) { act('pass', best); return true; }
     return false;
   }
   return {
-    start, update, sync, view, act, aimStart, aimMove, aimEnd, canAim, rewind, timeout, fastForward, simulate, stop, tapPass, endReplay,
+    start, update, sync, view, act, aimStart, aimCancel, canAim, rewind, timeout, fastForward, simulate, stop, tapPass, endReplay,
     nextPeriod: () => { if (M.phase === 'qbreak') nextPeriod(); },
-    ftInput: (du, dv) => { M.ftIn = { du, dv }; },
-    // bola do lance livre do usuário (para a interface saber onde ela está na tela)
-    ftBall: () => (M.phase === 'ft' && M.ft && M.ft.st === 'aim' && isCtl(P[M.ft.s]) ? { x: B.x, y: B.y, z: B.z, hx: 0, hz: -CT.HOOP_Z, rz: ftZone() + (M.boost.nose ? 0.07 : 0), full: !!M.boost.aim } : null),
     pause: (v) => { M.paused = v; },
     userScreen: () => { const u = user(); return u ? GFX.project(u.x, 1, u.z) : null; },
     debug: { startFT, foul, violation, endPeriod, give, startLay },
@@ -2371,14 +2572,16 @@ const Match = (() => {
 /* =====================================================================
    Arquivo 04: entrada — toque (Pointer Events), mouse e teclado
    - direcional virtual: toque na metade inferior esquerda
-   - mira do arremesso: arrastar para trás a partir do jogador ou do botão
+   - ARREMESSO: sempre pelo gesto de arrastar a bola para cima (InputSwipe /
+     BallController). O botão "Arremessar" (ou tocar no seu jogador, ou a
+     tecla Espaço) só levanta a bola e entra no modo de mira; ele NÃO lança.
    - toque simples num companheiro: passe
-   Teclado (PC): WASD/setas movem · Espaço arremessa/pula · E passa ·
-   Q dribla/rouba · F bandeja/enterrada
+   Teclado (PC): WASD/setas movem · Espaço levanta a bola/pula · E passa ·
+   Q dribla/rouba · F enterrada · Esc desiste do arremesso. O mouse faz o
+   papel do dedo (inclusive no gesto do arremesso).
    ===================================================================== */
 const Input = (() => {
   const joy = { x: 0, y: 0, id: -1, ox: 0, oy: 0 };
-  const aim = { id: -1, sx: 0, sy: 0, key: false, t: 0 };
   const keys = {}, tap = { id: -1, x: 0, y: 0, t: 0 };
   let layer = null, base = null, knob = null, H = null;      // H = handler do modo atual
 
@@ -2391,15 +2594,25 @@ const Input = (() => {
     window.addEventListener('keydown', (e) => key(e, true)); window.addEventListener('keyup', (e) => key(e, false));
     window.addEventListener('blur', reset);
   }
-  function reset() { joy.id = -1; joy.x = joy.y = 0; aim.id = -1; aim.key = false; for (const k in keys) keys[k] = false; if (base) base.style.display = 'none'; }
+  function reset() {
+    joy.id = -1; joy.x = joy.y = 0; for (const k in keys) keys[k] = false; if (base) base.style.display = 'none';
+    if (BallController.holding) BallController.drop('');     // perdeu o foco com a bola na mão: ela volta, sem arremessar
+  }
   function setHandler(h) { reset(); H = h; }
+  function stopJoy() { joy.id = -1; joy.x = joy.y = 0; base.style.display = 'none'; }
 
   function down(e) {
     if (!H) return;
     SND.init(); e.preventDefault();
     const r = rect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if (BallController.active) {                            // modo de mira: o dedo pega a bola (sem direcional)
+      if (BallController.grab(e.pointerId, x, y, false, e.timeStamp)) return;
+      tap.id = e.pointerId; tap.x = x; tap.y = y; tap.t = performance.now();
+      return;
+    }
+    // tocar no próprio jogador também levanta a bola, já presa ao dedo
     const o = H.origin && H.origin();
-    if (aim.id < 0 && o && Math.hypot(o.x - x, o.y - y) < 64 && H.aimStart()) { aim.id = e.pointerId; aim.sx = x; aim.sy = y; return; }
+    if (o && Math.hypot(o.x - x, o.y - y) < 64 && H.shotStart && H.shotStart()) { stopJoy(); BallController.grab(e.pointerId, x, y, true, e.timeStamp); return; }
     if (joy.id < 0 && H.joy !== false && y > r.height * 0.4 && x < r.width * 0.62) {
       joy.id = e.pointerId; joy.ox = x; joy.oy = y; joy.x = joy.y = 0;
       base.style.display = 'block'; base.style.left = x + 'px'; base.style.top = y + 'px'; knob.style.transform = 'translate(-50%,-50%)';
@@ -2410,30 +2623,37 @@ const Input = (() => {
   function move(e) {
     if (!H) return;
     const r = rect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if (e.pointerId === InputSwipe.state.id) {
+      // o navegador pode juntar vários movimentos num evento só: usa todos, cada um com o seu horário
+      const list = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+      for (const c of list) BallController.move(e.pointerId, c.clientX - r.left, c.clientY - r.top, c.timeStamp);
+      return BallController.move(e.pointerId, x, y, e.timeStamp);
+    }
     if (e.pointerId === joy.id) {
       const R = Math.min(56, r.width * 0.15); let dx = x - joy.ox, dy = y - joy.oy; const l = Math.hypot(dx, dy);
       if (l > R) { dx *= R / l; dy *= R / l; }
       joy.x = dx / R; joy.y = dy / R;
       knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-    } else if (e.pointerId === aim.id) {
-      const L = Math.min(r.height * 0.2, 190);
-      // estilingue: puxar para baixo dá força; puxar para o lado inverte a direção
-      H.aimMove((y - aim.sy) / L, (-(x - aim.sx) / L) * 0.9);
     }
   }
   function up(e) {
     if (!H) return;
-    if (e.pointerId === joy.id) { joy.id = -1; joy.x = joy.y = 0; base.style.display = 'none'; }
-    else if (e.pointerId === aim.id) { aim.id = -1; H.aimEnd(e.type === 'pointercancel'); }
+    if (e.pointerId === InputSwipe.state.id) {              // soltou a bola: o gesto decide se ela é lançada
+      const r = rect(); BallController.move(e.pointerId, e.clientX - r.left, e.clientY - r.top, e.timeStamp);
+      return BallController.release(e.pointerId, e.type === 'pointercancel');
+    }
+    if (e.pointerId === joy.id) stopJoy();
     else if (e.pointerId === tap.id) {
       tap.id = -1; const r = rect(), x = e.clientX - r.left, y = e.clientY - r.top;
       if (performance.now() - tap.t < 350 && Math.hypot(x - tap.x, y - tap.y) < 14 && H.tap) H.tap(x, y);
     }
   }
-  // o botão "Arremessar" inicia a mira com o mesmo dedo
-  function aimFromButton(e) {
-    if (!H || aim.id >= 0 || !H.aimStart()) return;
-    const r = rect(); aim.id = e.pointerId; aim.sx = e.clientX - r.left; aim.sy = e.clientY - r.top;
+  // botão "Arremessar": levanta a bola e ela já fica presa ao mesmo dedo. Quem lança é o swipe.
+  function shotFromButton(e) {
+    if (!H || !H.shotStart || !H.shotStart()) return;
+    try { if (e.target.hasPointerCapture(e.pointerId)) e.target.releasePointerCapture(e.pointerId); } catch (x) { /* sem captura */ }
+    stopJoy();
+    const r = rect(); BallController.grab(e.pointerId, e.clientX - r.left, e.clientY - r.top, true, e.timeStamp);
   }
   function key(e, on) {
     if (!H) return;
@@ -2445,91 +2665,592 @@ const Input = (() => {
       joy.y = (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0);
       const l = Math.hypot(joy.x, joy.y); if (l > 1) { joy.x /= l; joy.y /= l; }
     }
-    if (c === 'Space') {
-      if (on) { if (aim.id < 0 && H.aimStart()) { aim.key = true; aim.t = 0; } else if (H.key) H.key('jump'); }
-      else if (aim.key) { aim.key = false; H.aimEnd(false); }
-    } else if (on && H.key) {
-      if (c === 'KeyE') H.key('pass'); else if (c === 'KeyQ') H.key('q'); else if (c === 'KeyF') H.key('layup');
+    if (!on) return;
+    if (c === 'Space') { if (!(H.shotStart && H.shotStart()) && H.key && !BallController.active) H.key('jump'); }   // Espaço só levanta a bola
+    else if (c === 'Escape') { if (H.shotCancel) H.shotCancel(); }
+    else if (H.key) { if (c === 'KeyE') H.key('pass'); else if (c === 'KeyQ') H.key('q'); else if (c === 'KeyF') H.key('layup'); }
+  }
+  function update() { if (BallController.active && joy.id >= 0) stopJoy(); }
+  return { init, joy, setHandler, shotFromButton, update, reset };
+})();
+
+/* =====================================================================
+   Arquivo 04a: InputSwipe — o GESTO do arremesso (dedo ou mouse)
+   Só mede o movimento; não sabe nada de física nem de bola.
+   - guarda as últimas posições do dedo com o horário de cada uma
+     (janela de ~0,1 s) para calcular velocidade e direção do swipe;
+   - FORÇA = tamanho do empurrão PARA CIMA × aproveitamento da velocidade.
+     Arrastar para baixo/para trás ou parar o dedo zera a força;
+   - desvio lateral do swipe = direção esquerda/direita;
+   - movimento circular antes de soltar = giro da curva (curveball).
+   Coordenadas: pixels dentro do palco (x → direita, y → para baixo).
+   ===================================================================== */
+const InputSwipe = (() => {
+  const g = {
+    id: -1,                 // dedo que está segurando a bola (-1 = nenhum)
+    x: 0, y: 0,             // posição atual do dedo
+    samples: [],            // amostras recentes: { x, y, t } (t em segundos)
+    heard: 0,               // quando chegou o último movimento do dedo (para saber se ele parou)
+    baseY: 0,               // onde o empurrão para cima atual começou
+    px: 0, py: 0, hasDir: false, lx: 0, ly: 0,   // âncoras para medir o giro (movimento circular)
+    turn: 0,                // ângulo acumulado do movimento circular (rad, com sinal)
+    spin: 0,                // giro da curva já "carregado": -1..1
+    force: 0, dev: 0, vx: 0, vy: 0, len: 0,      // última medição (ver measure)
+  };
+  const now = () => performance.now() / 1000;
+  // horário do evento de toque (mais preciso que "agora": o navegador pode entregar vários eventos juntos)
+  const stamp = (ts) => { const n = now(), t = ts / 1000; return ts > 0 && Math.abs(n - t) < 2 ? t : n; };
+  const H = () => Math.max(1, GFX.size.H);
+
+  // começa a segurar: zera as medições
+  function begin(id, x, y, ts) {
+    Object.assign(g, { id, x, y, baseY: y, px: x, py: y, hasDir: false, turn: 0, spin: 0, force: 0, dev: 0, vx: 0, vy: 0, len: 0 });
+    g.samples = [{ x, y, t: stamp(ts) }]; g.heard = now();
+  }
+
+  function move(id, x, y, ts) {
+    if (id !== g.id) return;
+    const t = stamp(ts), dy = y - g.y;
+    if (x === g.x && y === g.y) return;
+    g.x = x; g.y = y; g.samples.push({ x, y, t }); g.heard = now();
+    if (dy > 1.5) g.baseY = y;                     // voltou para baixo: o empurrão recomeça daqui
+    // giro: soma o quanto a direção do movimento vira a cada ~8 px percorridos
+    const mx = x - g.px, my = y - g.py;
+    if (Math.hypot(mx, my) >= 8) {
+      if (g.hasDir) g.turn += Math.atan2(g.lx * my - g.ly * mx, g.lx * mx + g.ly * my);
+      g.lx = mx; g.ly = my; g.hasDir = true; g.px = x; g.py = y;
+      const need = ARREMESSO.voltasParaCurva * 2 * Math.PI, a = Math.abs(g.turn);
+      if (a >= need) {                             // completou o movimento circular: a bola começa a girar
+        const lvl = U.clamp(0.5 + (a - need) / (2.5 * Math.PI), 0.5, 1), dir = Math.sign(g.turn);
+        if (lvl > Math.abs(g.spin) || dir !== Math.sign(g.spin)) g.spin = dir * lvl;
+      }
     }
+    measure();
   }
-  function update(dt) {                    // teclado: segurar Espaço carrega a força
-    if (aim.key && H) { aim.t += dt; H.aimMove(Math.min(1.3, aim.t / 0.85), 0); }
-    if (aim.id >= 0 && H && H.aiming && !H.aiming()) aim.id = -1;
-    if (aim.key && H && H.aiming && !H.aiming()) aim.key = false;
+
+  /* Mede o gesto no instante t. É a ÚNICA função que calcula a força:
+     a seta na tela e o lançamento leem o mesmo g.force. */
+  function measure() {
+    const C = ARREMESSO, h = H(), s = g.samples;
+    // janela: amostras dos últimos ~0,1 s antes da mais recente (sempre sobram pelo menos duas, se existirem)
+    const b = s[s.length - 1];
+    while (s.length > 2 && b.t - s[0].t > C.janelaAmostras) s.shift();
+    const a = s[0], dt = b.t - a.t;
+    // dedo parado (nenhum movimento novo há mais de uma janela) ou amostras velhas demais: velocidade zero
+    if (s.length < 2 || dt < 0.003 || dt > 0.25 || now() - g.heard > C.janelaAmostras) { g.vx = g.vy = 0; } else { g.vx = (b.x - a.x) / dt; g.vy = (b.y - a.y) / dt; }
+    const up = -g.vy / h;                           // velocidade para cima, em "telas por segundo"
+    if (up <= 0.02) g.baseY = g.y;                  // dedo parado ou descendo: sem empurrão
+    g.len = Math.max(0, g.baseY - g.y) / h;         // tamanho do empurrão para cima (fração da tela)
+    if (up < C.velocidadeMinima) { g.force = 0; g.dev = 0; return g; }    // devagar demais: não gera força
+    const k = U.clamp((up - C.velocidadeMinima) / Math.max(0.01, C.velocidadeCheia - C.velocidadeMinima), 0, 1);
+    const quick = U.lerp(C.fatorSwipeLento, 1, k * k * (3 - 2 * k));     // aproveitamento pela velocidade
+    g.force = U.clamp((g.len / C.comprimentoForcaTotal) * quick, 0, 1);
+    g.dev = Math.atan2(g.vx, -g.vy);                // 0 = reto para cima · + = para a direita
+    return g;
   }
-  return { init, joy, setHandler, aimFromButton, update, reset };
+
+  // solta: devolve a medição final (ou null se o dedo não era o que segurava)
+  function end(id) {
+    if (id !== g.id) return null;
+    measure(); g.id = -1;
+    return { force: g.force, dev: g.dev, spin: g.spin, valid: g.force >= ARREMESSO.forcaMinimaParaLancar };
+  }
+  function cancel() { g.id = -1; g.force = 0; g.spin = 0; g.turn = 0; }
+  // o giro acumulado some aos poucos se o dedo parar de girar (evita curva "sem querer")
+  function update(dt) {
+    if (g.id < 0) return;
+    if (Math.abs(g.turn) < ARREMESSO.voltasParaCurva * 2 * Math.PI) g.turn *= Math.exp(-dt * 0.9);
+    measure();
+  }
+
+  return { begin, move, end, cancel, update, measure, get state() { return g; }, get holding() { return g.id >= 0; } };
+})();
+
+/* =====================================================================
+   Arquivo 04b: ThrowCalculator — física do arremesso e assistência de mira
+   Transforma o gesto (força, desvio lateral, giro) em um vetor 3D de
+   velocidade para a bola. Não depende de tela nem de DOM: só matemática.
+
+   Como funciona:
+   1. FORÇA: a força da seta (0..1) vira velocidade em m/s. Essa velocidade
+      NUNCA é alterada depois — a seta e a física usam o mesmo número.
+   2. VETOR DO JOGADOR: direção até a cesta, girada pelo desvio lateral do
+      swipe, com um ângulo de arco padrão.
+   3. VETOR IDEAL: para aquela mesma velocidade, o ângulo de arco e a
+      direção que fazem a bola cair dentro do aro (arco alto).
+   4. MISTURA: vetor final = jogador × (1 - assistência) + ideal × assistência.
+   5. CURVA: o giro vira uma força lateral contínua (efeito Magnus) durante
+      o voo; o lançamento já sai um pouco "contra" a curva para compensar.
+   ===================================================================== */
+const ThrowCalculator = (() => {
+  const G = CT.G, RAD = Math.PI / 180;
+
+  // menor velocidade capaz de levar a bola a um alvo a d metros (horizontal) e dh metros acima
+  const minSpeed = (d, dh) => Math.sqrt(G * (dh + Math.hypot(dh, d)));
+  // ângulo de lançamento que usa essa menor velocidade (o arco "mais econômico")
+  const cheapAngle = (d, dh) => Math.PI / 4 + 0.5 * Math.atan2(dh, d);
+  // arco mais alto aceito pela assistência (perto da cesta pode ser mais alto)
+  const maxAngle = (d) => U.clamp(80 - 2 * d, ARREMESSO.arcoMaximoLonge, ARREMESSO.arcoMaximoPerto) * RAD;
+  // força (0..1) -> velocidade (m/s). É a ÚNICA conversão de força do jogo.
+  // A curva é mais "macia" no meio (suavidadeForca) para a zona ideal não ficar estreita demais.
+  function speedOf(force, d, dh) {
+    const f = U.clamp(force, 0, 1), s = f + (ARREMESSO.suavidadeForca * Math.sin(2 * Math.PI * f)) / (2 * Math.PI);
+    return minSpeed(d, dh) * U.lerp(ARREMESSO.forcaMinima, ARREMESSO.forcaMaxima, s);
+  }
+
+  // ângulo (arco alto) para acertar o alvo com velocidade v; null se a velocidade não alcança
+  function angleFor(v, d, dh) {
+    const disc = v * v * v * v - G * (G * d * d + 2 * dh * v * v);
+    return disc < 0 ? null : Math.atan((v * v + Math.sqrt(disc)) / (G * d));
+  }
+  // tempo até a bola cruzar a altura do aro DESCENDO (null se não chega lá)
+  function timeToRim(v, ang, dh) {
+    const vy = v * Math.sin(ang), disc = vy * vy - 2 * G * dh;
+    return disc < 0 ? null : (vy + Math.sqrt(disc)) / G;
+  }
+  // desvio lateral do swipe com "zona reta": swipes quase retos contam como retos
+  function deadZone(a) {
+    const z = ARREMESSO.zonaReta, s = Math.sign(a), m = Math.abs(a);
+    return m <= z ? a * 0.12 : s * (z * 0.12 + (m - z));
+  }
+
+  /* Calcula o lançamento.
+     o = { x, y, z   posição da bola ao soltar (mundo)
+           hx, hz    centro do aro
+           force     força da seta, 0..1
+           dev       desvio lateral do swipe em rad (0 = reto, + = para a direita)
+           spin      giro da curva, -1..1 (+ = curva para a direita)
+           assist    assistência final, 0..1
+           nAng,nYaw ruído (rad) já sorteado — marcação do defensor, pressa etc. } */
+  function compute(o) {
+    const dx = o.hx - o.x, dz = o.hz - o.z, d = Math.hypot(dx, dz) || 0.01, dh = CT.HOOP_Y - o.y;
+    const ux = dx / d, uz = dz / d;               // direção horizontal até a cesta
+    const rx = -uz, rz = ux;                      // "direita" de quem olha para a cesta
+    const force = U.clamp(o.force, 0, 1), a = U.clamp(o.assist, 0, 1), spin = U.clamp(o.spin || 0, -1, 1);
+    const v = speedOf(force, d, dh);              // FORÇA APLICADA (m/s) — exatamente a da seta
+    const aLat = spin * ARREMESSO.forcaCurva;     // aceleração lateral da curva (m/s²)
+
+    // vetor "puro" do jogador
+    const angP = cheapAngle(d, dh) + ARREMESSO.anguloExtraJogador * RAD;
+    const yawP = deadZone(o.dev || 0) * ARREMESSO.sensibilidadeHorizontal;
+
+    // vetor ideal para ESTA força: arco alto que cai no aro, limitado ao arco máximo
+    let angI = angleFor(v, d, dh);
+    if (angI === null) angI = cheapAngle(d, dh);  // força insuficiente: o melhor possível ainda é curto
+    angI = Math.min(angI, maxAngle(d));
+    // compensação da curva: sair um pouco para o lado contrário para a curva trazer a bola de volta
+    let yawC = 0;
+    if (aLat) {
+      for (let i = 0; i < 8; i++) {               // aproximações sucessivas: sair de lado aumenta um pouco a distância efetiva
+        const de = d / Math.cos(yawC), an = angleFor(v, de, dh), ang = Math.min(an === null ? cheapAngle(de, dh) : an, maxAngle(d));
+        const t = timeToRim(v, ang, dh) || de / (v * Math.cos(ang));
+        yawC = U.lerp(yawC, Math.asin(U.clamp((-0.5 * aLat * t) / (v * Math.cos(ang)), -0.5, 0.5)), 0.6);
+        angI = ang;
+      }
+    }
+    // mistura jogador x ideal (a força não entra na mistura: ela é sempre a do jogador)
+    const ang = U.clamp(U.lerp(angP, angI, a) + (o.nAng || 0), 0.5, 1.4);
+    const yaw = U.lerp(yawP + yawC * ARREMESSO.compensacaoCurva, yawC, a) + (o.nYaw || 0);
+
+    const vh = v * Math.cos(ang), cy = Math.cos(yaw), sy = Math.sin(yaw);
+    const dirx = ux * cy + rx * sy, dirz = uz * cy + rz * sy;      // direção horizontal do lançamento
+    const L = {
+      x: o.x, y: o.y, z: o.z, vx: dirx * vh, vy: v * Math.sin(ang), vz: dirz * vh,
+      cax: rx * aLat, caz: rz * aLat,             // força lateral contínua da curva
+      force, speed: v, ang, yaw, dirx, dirz, d, spin, hx: o.hx, hz: o.hz,
+    };
+    // previsão: onde a bola cruza a altura do aro (em metros, em relação ao centro do aro)
+    const t = timeToRim(v, ang, dh);
+    if (t === null) { L.long = -9; L.lat = 0; L.zone = 'weak'; }
+    else {
+      L.long = vh * cy * t - d;                                    // + = passou do aro · - = ficou curta
+      L.lat = vh * sy * t + 0.5 * aLat * t * t;                    // + = para a direita
+      L.zone = L.long < -ARREMESSO.toleranciaCurta ? 'weak' : L.long > ARREMESSO.toleranciaLonga ? 'strong' : 'ideal';
+    }
+    return L;
+  }
+
+  // faixa de força "ideal" (amarela) para a situação atual: [início, fim] em 0..1
+  function idealBand(o) {
+    let lo = -1, hi = -1, best = 0.5, bd = 99;
+    const q = Object.assign({}, o, { dev: 0 });
+    for (let i = 0; i <= 50; i++) {
+      q.force = i / 50; const L = compute(q), e = Math.abs(L.long);
+      if (e < bd) { bd = e; best = q.force; }
+      if (L.zone === 'ideal') { if (lo < 0) lo = q.force; hi = q.force; }
+    }
+    return lo < 0 ? [best - 0.01, best + 0.01] : [lo - 0.01, hi + 0.01];
+  }
+
+  return { compute, idealBand, minSpeed, cheapAngle, angleFor, speedOf };
+})();
+
+/* =====================================================================
+   Arquivo 04c: BallController — a bola do arremesso em primeira pessoa
+   Máquina de estados:
+     OFF      não há arremesso em andamento
+     RESET    a bola nova sobe da base da tela (ou a bola fraca cai e volta)
+     IDLE     parada em primeiro plano, flutuando e girando devagar
+     HOLDING  presa ao dedo (segue com suavidade/lerp); mostra círculo e seta
+     FLYING   foi lançada: quem cuida dela agora é a física (Phys)
+
+   Quem abre o arremesso (partida, lance livre ou treino) chama start() com
+   uma "sessão":
+     { hx, hz        centro do aro
+       title         texto no topo da tela
+       mods()        -> { assist, noise }: bônus/penalidade de assistência e ruído (marcação etc.)
+       onThrow(L)    recebe o lançamento calculado; devolve true se a bola saiu
+       canCancel, canPass   botões extras (só na partida)
+       ball, flying()       bola em voo (para o rastro e o giro) }
+   ===================================================================== */
+const BallController = (() => {
+  const ST = { OFF: 'off', IDLE: 'idle', HOLDING: 'holding', FLYING: 'flying', RESET: 'reset' };
+  let st = ST.OFF, ses = null, t = 0, phase = 'rise', dropV = 0, ringT = 0;
+  let preview = null, band = [0.5, 0.6], noise = { a: 0, y: 0 }, gesture = null;
+  const scr = { x: 0, y: -1.5 };                  // posição da bola na tela (-1..1; y para cima)
+  let pos = null, tmp = null, fwd = null;         // vetores do Three.js (criados no primeiro uso)
+
+  // ponto do mundo que aparece na posição (nx, ny) da tela, a "distanciaBola" metros da câmera
+  function toWorld(nx, ny) {
+    const cam = GFX.camera;
+    tmp.set(nx, ny, 0.5).unproject(cam).sub(cam.position).normalize();
+    cam.getWorldDirection(fwd);
+    pos.copy(cam.position).addScaledVector(tmp, ARREMESSO.distanciaBola / Math.max(0.2, tmp.dot(fwd)));
+  }
+  // posição e raio da bola em pixels (para saber se o dedo tocou nela e para desenhar a seta)
+  function screen() {
+    const { W, H } = GFX.size, f = Math.tan((GFX.camera.fov * Math.PI) / 360);
+    return { x: (scr.x * 0.5 + 0.5) * W, y: (-scr.y * 0.5 + 0.5) * H, r: ((CT.BALL_R * ARREMESSO.tamanhoBolaNaMao) / (ARREMESSO.distanciaBola * f)) * H * 0.5 };
+  }
+  // tamanho do círculo-alvo: 1 (aberto) -> circuloMinimo (fechado) -> 1, em ciclo
+  const ringScale = () => ARREMESSO.circuloMinimo + (1 - ARREMESSO.circuloMinimo) * (0.5 + 0.5 * Math.cos((2 * Math.PI * ringT) / ARREMESSO.tempoCicloCirculo));
+  function quality() {
+    const s = ringScale();
+    return s < ARREMESSO.limiteExcelente ? 'excellent' : s < ARREMESSO.limiteOtimo ? 'great' : s < ARREMESSO.limiteBoa ? 'nice' : '';
+  }
+
+  /* Monta o lançamento a partir do gesto atual. É chamada a cada quadro enquanto
+     o jogador segura a bola (para desenhar a seta) e mais uma vez ao soltar —
+     por isso a seta e a física nunca mostram valores diferentes. */
+  function buildLaunch(g) {
+    const C = ARREMESSO, q = quality(), m = (ses.mods && ses.mods()) || {};
+    const bonus = q === 'excellent' ? C.bonusExcelente : q === 'great' ? C.bonusOtimo : q === 'nice' ? C.bonusBoa : 0;
+    const o = {
+      x: pos.x, y: pos.y, z: pos.z, hx: ses.hx, hz: ses.hz, force: g.force, dev: g.dev, spin: g.spin,
+      assist: U.clamp(C.assistencia + bonus + (m.assist || 0), 0, C.assistenciaMaxima),
+      nAng: noise.a * (m.noise || 0), nYaw: noise.y * (m.noise || 0) * 0.8,   // ruído sorteado ao pegar a bola
+    };
+    const L = ThrowCalculator.compute(o);
+    L.quality = q; L.contest = m.contest || 0;
+    band = ThrowCalculator.idealBand(o);
+    return L;
+  }
+
+  /* ---------- controle da sessão ---------- */
+  function start(session) {
+    if (!pos) { pos = new THREE.Vector3(); tmp = new THREE.Vector3(); fwd = new THREE.Vector3(); }
+    ses = session; st = ST.RESET; phase = 'rise'; t = 0; scr.x = 0; scr.y = -1.5; preview = null; gesture = null;
+    InputSwipe.cancel(); toWorld(scr.x, scr.y);
+  }
+  function end() { st = ST.OFF; ses = null; preview = null; InputSwipe.cancel(); }
+
+  /* ---------- entrada (chamado pelo Input) ---------- */
+  // o dedo tocou a tela: pega a bola se tocou nela (ou sempre, se "force" — ex.: veio do botão)
+  function grab(id, x, y, force, ts) {
+    if (st !== ST.IDLE && st !== ST.RESET) return false;
+    const s = screen();
+    if (!force && Math.hypot(x - s.x, y - s.y) > s.r * 1.45 + 14) return false;
+    st = ST.HOLDING; t = 0; ringT = 0; preview = null;
+    noise = { a: U.gauss(), y: U.gauss() };
+    InputSwipe.begin(id, x, y, ts); SND.play('grab');
+    return true;
+  }
+  function move(id, x, y, ts) { if (st === ST.HOLDING) InputSwipe.move(id, x, y, ts); }
+  // o dedo soltou: lança (gesto válido) ou deixa a bola cair e voltar (swipe curto/lento/para trás)
+  function release(id, cancel) {
+    if (st !== ST.HOLDING) return;
+    const g = InputSwipe.end(id); if (!g) return;
+    if (!cancel && g.valid) {
+      const L = buildLaunch(g);
+      if (ses.onThrow(L)) { st = ST.FLYING; t = 0; preview = null; ShotFeedback.thrown(L, band, ses); return; }
+    }
+    drop(cancel ? '' : g.force > 0 ? 'weak' : 'none');
+  }
+  function drop(why) {
+    st = ST.RESET; phase = 'drop'; t = 0; dropV = 0.6; preview = null; InputSwipe.cancel();
+    if (why) { SND.play('drop'); ShotFeedback.dropped(why); }
+  }
+
+  /* ---------- atualização por quadro (tempo real, não o tempo do jogo) ---------- */
+  function update(dt) {
+    if (st === ST.OFF || st === ST.FLYING) return;
+    const C = ARREMESSO, { W, H } = GFX.size; t += dt;
+    if (st === ST.IDLE) {                           // flutua levemente para cima e para baixo
+      const k = 1 - Math.exp(-dt * 9);
+      scr.x += (0 - scr.x) * k; scr.y += (C.alturaBola + Math.sin(t * C.flutuacaoVelocidade) * C.flutuacaoAltura - scr.y) * k;
+    } else if (st === ST.HOLDING) {                 // segue o dedo com um leve atraso
+      ringT += dt; InputSwipe.update(dt);
+      const g = InputSwipe.state, k = 1 - Math.exp(-dt * C.suavidadeSeguir);
+      scr.x += ((g.x / W) * 2 - 1 - scr.x) * k; scr.y += (-((g.y / H) * 2 - 1) - scr.y) * k;
+      toWorld(scr.x, scr.y);
+      gesture = g; preview = buildLaunch(g);
+      return;
+    } else if (phase === 'drop') {                  // swipe fraco: a bola cai na frente do jogador...
+      dropV -= 7 * dt; scr.y += dropV * dt;
+      if (scr.y < -1.55) { phase = 'rise'; t = 0; scr.x = 0; }
+    } else {                                        // ...e uma bola nova sobe da base da tela
+      const e = Math.min(1, t / C.tempoReaparecer), k = 1 - (1 - e) * (1 - e) * (1 - e);
+      scr.x += (0 - scr.x) * Math.min(1, dt * 12); scr.y = U.lerp(-1.55, C.alturaBola, k);
+      if (e >= 1) { st = ST.IDLE; t = 0; }
+    }
+    toWorld(scr.x, scr.y);
+  }
+
+  return {
+    ST, start, end, grab, move, release, drop, update, screen, ringScale, quality,
+    get state() { return st; }, get active() { return st !== ST.OFF; }, get holding() { return st === ST.HOLDING; },
+    get session() { return ses; }, get pos() { return pos; }, get preview() { return preview; }, get band() { return band; },
+    get gesture() { return gesture; }, get time() { return t; },
+  };
+})();
+
+/* =====================================================================
+   Arquivo 04d: ShotFeedback — efeitos e interface do arremesso por gesto
+   - círculo-alvo sobre o aro (diminui e cresce em ciclo enquanto segura);
+   - SETA DE FORÇA: nasce na bola e aponta para onde ela vai ser lançada.
+     O tamanho é a força (0..100%) e a cor é o resultado previsto:
+       verde = fraca · amarela = ideal · vermelha = forte demais.
+     Os números vêm do mesmo cálculo usado no lançamento (BallController);
+   - giro e brilho da bola com curva, rastro e giro para trás no voo;
+   - bola que errou continua quicando e some; textos BOA!/ÓTIMO!/EXCELENTE!
+   ===================================================================== */
+const ShotFeedback = (() => {
+  const $ = U.$, el = {}, shown = {};
+  const COL = { weak: '#49e04b', ideal: '#ffd400', strong: '#ff4d3c' }, WORD = { weak: 'FRACA', ideal: 'IDEAL', strong: 'FORTE' };
+  let frozen = null, frozenT = 0;         // seta "congelada" por um instante depois de soltar (mostra a força aplicada)
+  let tip = '', tipT = 0, tipBad = false; // aviso temporário na base da tela
+  let fly = null;                         // bola em voo: { ball, flying, pts, spin, axis }
+  let ghost = null;                       // bola anterior que continua quicando até sumir
+  let spinning = false, hadSpin = false, axis = null, UP = null, arcOn = false, ballScale = 1;
+
+  function init() {
+    ['shotui', 'sw-t', 'sw-tip', 'sw-ring', 'sw-in', 'sw-arrow', 'sw-track', 'sw-shaft', 'sw-head', 'sw-lbl', 'sw-spin', 'sw-cancel', 'sw-pass', 'sw-q'].forEach((id) => { el[id] = $('#' + id); });
+    const press = (id, fn) => el[id].addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); SND.play('click'); fn(); });
+    press('sw-cancel', () => Match.aimCancel());
+    press('sw-pass', () => Match.act('pass'));
+    axis = new THREE.Vector3(); UP = new THREE.Vector3(0, 1, 0);
+  }
+  const vis = (id, on) => { if (shown[id] !== on) { shown[id] = on; el[id].classList.toggle('hidden', !on); } };
+  const txt = (id, v) => { const k = 't_' + id; if (shown[k] !== v) { shown[k] = v; el[id].textContent = v; } };
+
+  /* ---------- seta de força ---------- */
+  function drawArrow(L, band, s) {
+    const { W, H } = GFX.size, a = el['sw-arrow'];
+    // Direção na tela: sempre para FRENTE (para cima), inclinada para o lado da cesta e pelo desvio
+    // do lançamento (L.yaw: + = direita). Usa um ponto bem acima do aro para a seta não "girar"
+    // quando a bola passa por cima da cesta na tela.
+    const p = GFX.project(L.hx, CT.HOOP_Y, L.hz);
+    const ang = U.clamp(Math.atan2(p.x - s.x, Math.max(1, s.y - p.y) + 0.6 * H) + L.yaw * 3, -0.9, 0.9);
+    const bx = s.x + Math.sin(ang) * s.r * 0.95, by = s.y - Math.cos(ang) * s.r * 0.95;
+    const max = H * 0.36, len = Math.max(4, L.force * max), c = COL[L.zone], lo = band[0] * 100, hi = band[1] * 100;
+    a.style.transform = `translate(${bx.toFixed(1)}px, ${by.toFixed(1)}px) rotate(${ang.toFixed(3)}rad)`;
+    el['sw-track'].style.height = max + 'px';
+    el['sw-track'].style.background = `linear-gradient(to top, ${COL.weak} 0 ${lo}%, ${COL.ideal} ${lo}% ${hi}%, ${COL.strong} ${hi}% 100%)`;
+    el['sw-shaft'].style.height = len + 'px'; el['sw-shaft'].style.background = c;
+    el['sw-head'].style.bottom = len - 1 + 'px'; el['sw-head'].style.borderBottomColor = c;
+    const head = GFX.size.W * 0.04 * 1.5, tl = len + head + GFX.size.W * 0.07, l = el['sw-lbl'];
+    l.style.left = U.clamp(bx + Math.sin(ang) * tl, W * 0.2, W * 0.8) + 'px'; l.style.top = Math.max(H * 0.2, by - Math.cos(ang) * tl) + 'px'; l.style.color = c;
+    txt('sw-lbl', `${Math.round(L.force * 100)}% ${WORD[L.zone]}`);
+  }
+
+  /* ---------- círculo-alvo sobre o aro ---------- */
+  function drawRing(ses, scale, q) {
+    const h = GFX.project(ses.hx, CT.HOOP_Y, ses.hz), m = GFX.camera.matrixWorld.elements;
+    const e = GFX.project(ses.hx + m[0] * CT.RIM_R, CT.HOOP_Y + m[1] * CT.RIM_R, ses.hz + m[2] * CT.RIM_R);
+    const R = Math.max(GFX.size.W * 0.07, Math.hypot(e.x - h.x, e.y - h.y) * 2.3), r = el['sw-ring'];
+    r.style.left = h.x + 'px'; r.style.top = h.y + 'px'; r.style.width = r.style.height = R * 2 + 'px';
+    el['sw-in'].style.transform = `scale(${scale.toFixed(3)})`;
+    el['sw-in'].style.color = el['sw-in'].style.borderColor = q === 'excellent' ? '#ffd400' : q === 'great' ? '#7dff6a' : q === 'nice' ? '#7fd4ff' : '#ffffff';
+  }
+
+  /* ---------- eventos ---------- */
+  // a bola foi lançada: congela a seta com a força aplicada e começa o rastro
+  function thrown(L, band, ses) {
+    frozen = { L, band: band.slice(), s: BallController.screen() }; frozenT = 0.6;
+    fly = { ball: ses.ball, flying: ses.flying, pts: [], spin: L.spin, dx: L.dirx, dz: L.dirz, rim: false };
+    SND.play('whoosh'); if (L.spin) SND.play('spin', 0.7);
+  }
+  // swipe curto, lento ou para trás: a bola não foi lançada
+  function dropped(why) {
+    tip = why === 'weak' ? 'Fraco demais! Empurre mais longo e mais rápido' : 'Deslize PARA CIMA, em direção à cesta'; tipT = 2.4; tipBad = true;
+  }
+  // cesta de um arremesso por gesto: texto conforme a precisão do círculo (+ curva)
+  function scored(meta) {
+    if (!meta) return;
+    const C = ARREMESSO, q = meta.q, word = q === 'excellent' ? C.textoExcelente : q === 'great' ? C.textoOtimo : q === 'nice' ? C.textoBoa : '';
+    if (!word && !meta.spin) return;
+    const e = el['sw-q'];
+    e.innerHTML = (word || C.textoCurva) + (word && meta.spin ? `<small>${C.textoCurva}</small>` : '');
+    e.className = 'out ' + (q || 'curve'); void e.offsetWidth; e.classList.add('go');
+    if (q) SND.play(q); else SND.play('nice');
+  }
+  // a bola do arremesso anterior continua na física (quica no aro/chão) e some depois de "life" segundos
+  function ghostFrom(B, life = ARREMESSO.tempoSumirErro) {
+    ghost = { x: B.x, y: B.y, z: B.z, vx: B.vx, vy: B.vy, vz: B.vz, cax: B.cax || 0, caz: B.caz || 0, t: life };
+    GFX.ball2.quaternion.copy(GFX.ball.quaternion);
+    if (fly && fly.ball === B) fly = null;
+    GFX.setTrail([]);
+  }
+  function clear() {
+    frozen = null; frozenT = 0; fly = null; ghost = null; tipT = 0; spinning = false; hadSpin = false; ballScale = 1; GFX.ball.scale.setScalar(1);
+    GFX.setTrail([]); GFX.setGlow(0, 0); GFX.ball2.visible = false; GFX.traj([]); arcOn = false;
+    for (const id of ['shotui']) vis(id, false);
+    el['sw-q'].className = 'out';
+  }
+
+  /* ---------- atualização por quadro ---------- */
+  function update(dt) {
+    const bc = BallController, C = ARREMESSO, st = bc.state, ses = bc.session;
+    const hand = st === 'idle' || st === 'holding' || st === 'reset', holding = st === 'holding';
+    if (frozenT > 0) frozenT -= dt;
+    vis('shotui', hand || frozenT > 0);
+    vis('sw-t', hand); vis('sw-tip', hand); vis('sw-ring', holding);
+    vis('sw-cancel', hand && !!ses.canCancel); vis('sw-pass', hand && !!ses.canPass);
+    const g = bc.gesture, L = holding ? bc.preview : null, spin = holding && g ? g.spin : 0;
+
+    // seta: aparece só quando existe força (empurrando para frente); some ao parar ou arrastar para trás
+    const arrow = L && L.force > 0 ? { L, band: bc.band, s: bc.screen() } : frozenT > 0 ? frozen : null;
+    vis('sw-arrow', !!arrow); vis('sw-lbl', !!arrow);
+    if (arrow) { drawArrow(arrow.L, arrow.band, arrow.s); el['sw-arrow'].style.opacity = el['sw-lbl'].style.opacity = L ? 1 : Math.min(1, frozenT / 0.2); }
+    // melhoria "Linha de Mira" (ou treino alto): arco pontilhado que a bola vai fazer com o empurrão atual
+    if (L && L.force > 0 && ses.arc) {
+      const pts = [];
+      for (let i = 2; i <= 24; i++) {
+        const t = i * 0.06, y = L.y + L.vy * t - 0.5 * CT.G * t * t; if (y < CT.HOOP_Y - 0.2 && L.vy - CT.G * t < 0) break;
+        pts.push([L.x + L.vx * t + 0.5 * L.cax * t * t, y, L.z + L.vz * t + 0.5 * L.caz * t * t, 0.55]);
+      }
+      GFX.traj(pts); arcOn = true;
+    } else if (arcOn) { GFX.traj([]); arcOn = false; }
+
+    if (hand) {
+      txt('sw-t', ses.title || '');
+      if (tipT > 0) tipT -= dt; else tipBad = false;
+      let m = tip;
+      if (tipT <= 0) {
+        if (!holding) m = 'Segure a bola e deslize para cima';
+        else if (L && L.force > 0) m = 'Solte para arremessar!';
+        else if (spin) m = 'Girando! Agora empurre para a cesta';
+        else m = L && L.contest > 0.5 ? 'Marcado! Empurre para a cesta' : 'Empurre para a cesta · solte com o círculo pequeno';
+      }
+      txt('sw-tip', m); el['sw-tip'].classList.toggle('bad', tipBad || (holding && !!L && L.contest > 0.5 && tipT <= 0));
+      if (holding) drawRing(ses, bc.ringScale(), bc.quality());
+      // bola na mão: gira devagar parada; com efeito, gira rápido e brilha
+      const b = GFX.ball, s = bc.screen();
+      b.rotation.y += dt * (C.giroParado + Math.abs(spin) * 26) * (spin < 0 ? -1 : 1); b.rotation.x += dt * C.giroParado * 0.5;
+      GFX.setGlow(Math.abs(spin), 0x6fe3ff);
+      vis('sw-spin', !!spin);
+      if (spin) {
+        el['sw-spin'].style.left = s.x + 'px'; el['sw-spin'].style.top = s.y + s.r * 1.35 + 'px'; txt('sw-spin', spin > 0 ? 'CURVA ↻' : '↺ CURVA');
+        if (!hadSpin) SND.play('spin');
+      }
+      hadSpin = !!spin;
+    } else { vis('sw-spin', false); hadSpin = false; }
+
+    // na mão a bola é desenhada menor (não tapa a cesta); ao sair, volta ao tamanho real em um instante
+    ballScale = hand ? C.tamanhoBolaNaMao : ballScale + (1 - ballScale) * Math.min(1, dt * 9);
+    GFX.ball.scale.setScalar(ballScale);
+    // bola em voo: giro para trás (backspin), giro lateral da curva, brilho e rastro
+    spinning = hand;
+    if (fly) {
+      const B = fly.ball, on = fly.flying();
+      if (on) {
+        spinning = true;
+        fly.pts.unshift([B.x, B.y, B.z, 1]); if (fly.pts.length > C.rastroPontos) fly.pts.pop();
+        axis.set(-fly.dz, 0, fly.dx);
+        GFX.ball.rotateOnWorldAxis(axis, C.giroBackspin * dt);
+        if (fly.spin) GFX.ball.rotateOnWorldAxis(UP, fly.spin * 20 * dt);
+      } else { fly.pts.pop(); fly.pts.pop(); }                 // acabou o voo: o rastro some aos poucos
+      const n = fly.pts.length;
+      for (let i = 0; i < n; i++) fly.pts[i][3] = (1 - i / C.rastroPontos) * 0.6 * ballScale;
+      GFX.setTrail(fly.pts.slice(1), fly.spin ? 0x6fe3ff : 0xffffff);
+      if (!hand) GFX.setGlow(on && fly.spin ? Math.abs(fly.spin) : 0, 0x6fe3ff);
+      if (!on && !n) fly = null;
+    } else if (!hand) GFX.setGlow(0, 0);
+
+    // bola anterior: física real até sumir
+    const b2 = GFX.ball2;
+    if (ghost) {
+      const ev = {}; Phys.step(ghost, dt, ev); ghost.t -= dt;
+      if (ev.floor) SND.play('bounce', ev.floor * 0.7); if (ev.rim) SND.play('rim', ev.rim * 0.7); if (ev.board) SND.play('board', 0.7);
+      b2.visible = true; b2.position.set(ghost.x, ghost.y, ghost.z); b2.scale.setScalar(U.clamp(ghost.t / 0.25, 0, 1));
+      b2.rotation.x += ghost.vz * dt * 4; b2.rotation.z -= ghost.vx * dt * 4;
+      if (ghost.t <= 0) ghost = null;
+    } else if (b2.visible) b2.visible = false;
+  }
+
+  return { init, update, thrown, dropped, scored, ghostFrom, clear, get spinning() { return spinning; } };
 })();
 
 /* =====================================================================
    Arquivo 05: treinos (minigames)
    - three: 5 posições x 3 bolas atrás da linha de 3, contra o relógio
-   - ft:    10 lances livres com mira e barra de força
+   - ft:    10 lances livres
    - cones: slalom de drible entre cones, contra o relógio
-   Reaproveita a física (Phys), a mira (aimViz) e os bonecos (GFX).
+   Os arremessos (three e ft) usam o mesmo gesto de swipe em primeira pessoa
+   da partida: BallController + ThrowCalculator + ShotFeedback.
    ===================================================================== */
 const Train = (() => {
   const T = {}, B = { x: 0, y: 1, z: 0, vx: 0, vy: 0, vz: 0 };
   let model = null, done = null, cones = [];
   const HZ = -CT.HOOP_Z;
   const INFO = {
-    three: { name: 'ARREMESSO DE 3', ic: '🎯', desc: '5 posições, 3 bolas em cada. A última de cada posição vale 2!', stars: [6, 11, 15] },
-    ft: { name: 'LANCES LIVRES', ic: '🏀', desc: '10 lances livres. Toque na bola em cima do alvo verde: o ponto do toque define a direção e a força.', stars: [4, 6, 8] },
+    three: { name: 'ARREMESSO DE 3', ic: '🎯', desc: '5 posições, 3 bolas em cada. Segure a bola e deslize para cima. A última de cada posição vale 2 e cesta com curva vale +1!', stars: [6, 11, 15] },
+    ft: { name: 'LANCES LIVRES', ic: '🏀', desc: '10 lances livres. Segure a bola e deslize para cima: seta amarela é a força ideal. Solte com o círculo pequeno para mais precisão.', stars: [4, 6, 8] },
     cones: { name: 'DRIBLE ENTRE CONES', ic: '🚧', desc: 'Contorne os cones alternando os lados o mais rápido possível.', stars: [12, 9.5, 7.5] },
   };
 
   function start(kind, cb) {
     done = cb;
-    Object.assign(T, { kind, on: true, t: 0, score: 0, st: 'ready', stT: 0, x: 0, z: 0, y: 0, vx: 0, vz: 0, rot: Math.PI, dph: 0, aim: { on: false, p: 0, dev: 0 }, msg: '', shot: 0, made: false, spot: 0, ball: 0, time: 45, gate: 0, pen: 0, ftIn: null, sh: false });
+    Object.assign(T, { kind, on: true, t: 0, score: 0, st: 'ready', stT: 0, x: 0, z: 0, y: 0, vx: 0, vz: 0, rot: Math.PI, dph: 0, msg: '', shot: 0, made: false, spot: 0, ball: 0, time: 60, gate: 0, pen: 0, sw: null, rimHit: false, over: false });
     GFX.disposeModel(model);
     const t = TEAMS[S.teamId];
     model = GFX.makeModel(Object.assign({}, S.look, { c1: t.c1, c2: t.c2 }));
     GFX.paintCourt(t.c1, t.c2); GFX.setCones([]); cones = [];
     if (kind === 'three') placeSpot();
-    else if (kind === 'ft') { T.x = 0; T.z = -(CT.HL - CT.FT_D - 0.25); HUD.ftShow(true, 1, 10); }
+    else if (kind === 'ft') { T.x = 0; T.z = -(CT.HL - CT.FT_D - 0.25); }
     else {
       const list = []; for (let i = 0; i < 9; i++) list.push([0, 7 - i * 2]);
       cones = GFX.setCones(list).map((m, i) => ({ m, x: 0, z: list[i][1], hit: false }));
       T.x = 0.9; T.z = 9.2; T.st = 'run';
     }
     GFX.star.visible = false;
-    Input.setHandler({
-      joy: kind === 'cones',
-      origin: () => (kind === 'three' ? GFX.project(T.x, 1, T.z) : null),
-      aimStart: () => { if (kind !== 'three' || T.st !== 'ready') return false; T.st = 'aim'; T.aim = { on: true, p: 0, dev: 0 }; return true; },
-      aimMove: (p, d) => { T.aim.p = U.clamp(p, 0, 1.4); T.aim.dev = U.clamp(d, -0.6, 0.6); },
-      aimEnd: (cancel) => { if (T.st === 'aim') { T.aim.on = false; if (cancel || T.aim.p < 0.3) T.st = 'ready'; else shoot3(); } },
-      aiming: () => T.st === 'aim',
-    });
+    Input.setHandler({ joy: kind === 'cones' });
+    if (kind !== 'cones') newBall();
   }
   function placeSpot() {
     const a = [-1.05, -0.55, 0, 0.55, 1.05][T.spot];
     T.x = Math.sin(a) * 7.15; T.z = HZ + Math.cos(a) * 7.15; T.rot = Math.atan2(-T.x, HZ - T.z);
   }
-  const hand = () => ({ x: T.x + Math.sin(T.rot) * 0.24, y: T.y + 2.28, z: T.z + Math.cos(T.rot) * 0.24 });
   const skill = () => Math.min(0.95, 0.58 + S.training.level * 0.019);
 
-  function launch(long, lat, th) {
-    const hp = hand(); let ux = -hp.x, uz = HZ - hp.z; const l = Math.hypot(ux, uz); ux /= l; uz /= l;
-    Phys.launch(B, hp.x, hp.y, hp.z, ux * long - uz * lat, CT.HOOP_Y, HZ + uz * long + ux * lat, th);
-    T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; SND.play('pass', 0.6);
-  }
-  function shoot3() {
-    const a = T.aim, d = U.dist(T.x, T.z, 0, HZ), E = aimErr(a, d);
-    if (E.perfect) { SND.play('perfect'); HUD.float(T.x, 2.7, T.z, 'PERFEITO!', 'good'); }
-    const sg = (0.022 + 0.0045 * d) * (1.4 - 0.62 * skill());
-    launch(E.long + U.gauss() * sg, E.lat + U.gauss() * sg * 0.8, (U.clamp(62 - d * 1.9, 47, 62) * Math.PI) / 180);
-  }
-  // lance livre: bola à frente da câmera; o toque na bola define o chute (ver ftVel)
-  const ftBall = () => (T.on && T.kind === 'ft' && T.st === 'ready' ? { x: T.x, y: FT_BALL.y, z: T.z - FT_BALL.ahead, hx: 0, hz: HZ, rz: ftZone(), full: S.training.level >= 5 } : null);
-  function ftInput(du, dv) {
-    const b = ftBall(); if (!b) return;
-    if (Math.hypot(du, dv) < b.rz) { SND.play('perfect'); HUD.float(0, CT.HOOP_Y + 1.2, HZ, 'PERFEITO!', 'good'); }
-    B.x = b.x; B.y = b.y; B.z = b.z; Object.assign(B, ftVel(b.x, b.y, b.z, 0, HZ, du, dv, b.rz));
-    T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; SND.play('pass', 0.7);
-    HUD.ftShow(false);
+  // bola nova em primeiro plano: o BallController cuida do gesto e avisa em onThrow quando ela for lançada
+  function newBall() {
+    T.st = 'ready'; T.stT = 0;
+    BallController.start({
+      owner: 'train', hx: 0, hz: HZ,
+      title: T.kind === 'ft' ? `LANCE LIVRE ${Math.min(10, T.shot + 1)}/10` : T.ball === 2 ? 'BOLA DOURADA · VALE 2' : 'ARREMESSO DE 3',
+      mods: () => ({ assist: (skill() - 0.6) * 0.1 + (T.kind === 'ft' ? 0.03 : 0), noise: 0.004, contest: 0 }),
+      onThrow: (L) => {
+        if (!T.on || T.st !== 'ready') return false;
+        Object.assign(B, { x: L.x, y: L.y, z: L.z, vx: L.vx, vy: L.vy, vz: L.vz, cax: L.cax, caz: L.caz });
+        T.st = 'fly'; T.stT = 0; T.made = false; T.rimHit = false; T.over = false; T.sw = { q: L.quality, spin: L.spin };
+        return true;
+      },
+      arc: S.training.level >= 5, ball: B, flying: () => T.on && T.st === 'fly' && !T.rimHit && !T.made,
+    });
   }
   function finish() {
-    if (!T.on) return; T.on = false; HUD.ftShow(false);
+    if (!T.on) return; T.on = false; BallController.end();
     const I = INFO[T.kind]; let val = T.score, stars;
     if (T.kind === 'cones') { val = T.t + T.pen; stars = I.stars.filter((s) => val <= s).length; }
     else stars = I.stars.filter((s) => val >= s).length;
@@ -2566,80 +3287,76 @@ const Train = (() => {
       T.msg = `⏱ ${(T.t + T.pen).toFixed(1)}s`;
       GFX.setFov(46); GFX.cam(T.x * 0.6, 11, T.z + 9.5, T.x * 0.6, 0.6, T.z - 2.5, 1 - Math.exp(-dt * 4));
     } else {
-      if (T.kind === 'three' && T.st !== 'done') { T.time -= dt; if (T.time <= 0 && T.st !== 'fly') return finish(); }
-      if (T.st === 'ready' || T.st === 'aim') {
-        mode = T.st === 'aim' ? 'aim' : T.kind === 'ft' ? 'idle' : 'hold'; T.y = 0;
-        const hp = T.kind === 'ft' ? ftBall() : T.st === 'aim' ? hand() : { x: T.x + Math.sin(T.rot) * 0.36, y: 1.2, z: T.z + Math.cos(T.rot) * 0.36 };
-        B.x = hp.x; B.y = hp.y; B.z = hp.z; B.vx = B.vy = B.vz = 0;
-        if (T.st === 'aim') { const r = aimViz(T.x, T.z, hand(), T.aim, S.training.level >= 5, fl); HUD.aimLabel(true, r.x, r.y, Math.round(T.aim.p * 100), r.good, true); }
+      if (T.kind === 'three') { T.time -= dt; if (T.time <= 0 && T.st !== 'fly') return finish(); }
+      if (T.st === 'ready') {
+        // bola na mão: a posição vem do BallController (parada, presa ao dedo ou reaparecendo)
+        const q = BallController.pos; B.x = q.x; B.y = q.y; B.z = q.z; B.vx = B.vy = B.vz = 0;
       } else if (T.st === 'fly') {
-        mode = T.stT < 0.4 && T.kind !== 'ft' ? 'shoot' : 'idle'; T.y = T.stT < 0.5 && T.kind !== 'ft' ? 4 * 0.45 * (T.stT / 0.5) * (1 - T.stT / 0.5) : 0;
         const ev = {}; Phys.step(B, dt, ev);
-        if (ev.floor) SND.play('bounce', ev.floor); if (ev.rim) { SND.play('rim', ev.rim); GFX.hoops[0].shake = 0.4; GFX.hoops[0].kick(B.vx * 0.3, B.vz * 0.3, 0.15); T.rimHit = true; } if (ev.board) SND.play('board');
+        if (ev.floor) SND.play('bounce', ev.floor); if (ev.rim) { SND.play('rim', ev.rim); GFX.hoops[0].shake = 0.4; GFX.hoops[0].kick(B.vx * 0.3, B.vz * 0.3, 0.15); T.rimHit = true; } if (ev.board) { SND.play('board'); T.rimHit = true; }
         if (ev.score === 0 && !T.made) {
-          T.made = true; const gold = T.kind === 'three' && T.ball === 2;
-          T.score += gold ? 2 : 1; SND.play('swish'); GFX.hoops[0].kick(B.vx, B.vz, 1); GFX.hypeUp(0.5);
+          T.made = true; const gold = T.kind === 'three' && T.ball === 2, curve = T.sw && T.sw.spin ? ARREMESSO.bonusCurvaPontos : 0;
+          T.score += (gold ? 2 : 1) + curve; SND.play('swish'); GFX.hoops[0].kick(B.vx, B.vz, 1); GFX.hypeUp(0.5);
           GFX.burst(0, CT.HOOP_Y - 0.3, HZ, [0xffd400, 0xffffff, 0xff7a1a], 20, 4);
-          HUD.float(0, CT.HOOP_Y + 0.7, HZ, (T.rimHit ? 'NO ARO... E CAIU! ' : '') + (gold ? '+2' : '+1'), 'good'); B.vx *= 0.3; B.vz *= 0.3;
+          HUD.float(0, CT.HOOP_Y + 0.7, HZ, (T.rimHit ? 'NO ARO... E CAIU! ' : '') + (gold ? '+2' : '+1') + (curve ? ` +${curve} CURVA` : ''), 'good'); B.vx *= 0.3; B.vz *= 0.3;
+          ShotFeedback.scored(T.sw); T.stT = 0;
         }
-        if ((T.made && T.stT > 0.9 && B.y < 2.2) || (B.y < 1 && T.stT > 0.7) || T.stT > 3) {       // próxima bola
-          T.shot++; T.st = 'ready'; T.stT = 0;
+        // resultado decidido (cesta, ou bola já abaixo do aro sem chance): a bola antiga continua quicando
+        // e some sozinha, enquanto uma nova sobe da base da tela
+        if (!T.over && !T.made && (B.y < 2.3 && B.vy < 0 || T.stT > 3.2)) { T.over = true; T.stT = 0; }
+        if ((T.made && T.stT > 0.55) || (T.over && T.stT > 0.3)) {
+          ShotFeedback.ghostFrom(B, T.made ? 0.9 : ARREMESSO.tempoSumirErro);
+          T.shot++;
           if (T.kind === 'three') { T.ball++; if (T.ball > 2) { T.ball = 0; T.spot++; if (T.spot > 4) return finish(); placeSpot(); } if (T.time <= 0) return finish(); }
-          else { if (T.shot >= 10) return finish(); HUD.ftShow(true, T.shot + 1, 10); }
+          else if (T.shot >= 10) return finish();
+          newBall();
         }
       }
-      if (T.st !== 'aim') { GFX.setArrow(false); GFX.traj([]); HUD.aimLabel(false); }
       T.msg = T.kind === 'three' ? `⏱ ${Math.max(0, T.time).toFixed(0)}s · bola ${Math.min(15, T.spot * 3 + T.ball + 1)}/15` : `Lance ${Math.min(10, T.shot + 1)}/10`;
-      GFX.setFov(T.kind === 'ft' ? 58 : 46);
-      if (T.kind === 'ft') GFX.cam(T.x, 1.75, T.z - 0.1, 0, 2.6, HZ, 1 - Math.exp(-dt * 7));   // primeira pessoa
-      else {                                           // câmera atrás do arremessador, olhando para a cesta
-        const dx = T.x, dz = T.z - HZ, l = Math.hypot(dx, dz) || 1;
-        GFX.cam(U.clamp(T.x + (dx / l) * 6, -9.2, 9.2), 4.6, T.z + (dz / l) * 6, T.x - (dx / l) * 3, 1.8, T.z - (dz / l) * 3, 1 - Math.exp(-dt * 4));
-      }
+      // primeira pessoa: olho do arremessador olhando para a cesta (no voo o olhar sobe um pouco atrás da bola)
+      const dx = -T.x, dz = HZ - T.z, l = Math.hypot(dx, dz) || 1, ly = T.st === 'fly' && !T.over ? U.clamp(2.6 + (B.y - 2.6) * 0.45, 2.3, 4.6) : 2.6;
+      GFX.setFov(58); GFX.cam(T.x + (dx / l) * 0.1, 1.75, T.z + (dz / l) * 0.1, 0, ly, HZ, 1 - Math.exp(-dt * 7));
       GFX.setRing(GFX.passRing, false);
     }
     GFX.floor(fl);
     GFX.animate(model, mode, speed, dt, T.dph);
     model.g.position.set(T.x, T.y, T.z); model.g.rotation.y = T.rot;
-    GFX.setRing(GFX.userRing, T.kind !== 'ft', T.x, T.z);
-    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z); bm.rotation.x += dt * 5;
+    model.g.visible = T.kind === 'cones';                  // nos arremessos a câmera é o próprio jogador
+    GFX.setRing(GFX.userRing, T.kind === 'cones', T.x, T.z);
+    const bm = GFX.ball; bm.position.set(B.x, B.y, B.z); if (!ShotFeedback.spinning) bm.rotation.x += dt * 5;
   }
   function stop() {
     T.on = false; GFX.disposeModel(model); model = null; GFX.setCones([]); cones = [];
     GFX.setArrow(false); GFX.traj([]); GFX.floor([]); GFX.setRing(GFX.userRing, false); GFX.setRing(GFX.passRing, false);
-    HUD.ftShow(false); HUD.aimLabel(false);
+    if (BallController.active && BallController.session.owner === 'train') BallController.end();
+    ShotFeedback.clear();
   }
-  return { start, update, stop, ftInput, ftBall, finish, INFO, get state() { return T; } };
+  return { start, update, stop, finish, INFO, get state() { return T; } };
 })();
 
 /* =====================================================================
    Arquivo 06: interface HTML
-   - HUD: placar, relógios, botões de ação, avisos animados, lance livre
+   - HUD: placar, relógios, botões de ação, avisos animados
+     (a interface do arremesso por gesto fica no ShotFeedback)
    - UI: menus do modo carreira (início, loja, partidas, eventos, estilo
      de vida), pré-jogo, resultado e janelas (modais)
    ===================================================================== */
 const HUD = (() => {
   const $ = U.$, el = {}, cache = {};
-  let toastT = 0, aimOn = false, joyUsed = false;
-  const ft = { on: false, t: 0, down: false, u: 0, v: 0, cx: 0, cy: 0, R: 1, tx: 0, ty: 0 };
+  let toastT = 0, joyUsed = false;
   const set = (id, v) => { if (cache[id] !== v) { cache[id] = v; el[id].textContent = v; } };
   const vis = (id, on) => { const k = 'v_' + id; if (cache[k] !== on) { cache[k] = on; el[id].classList.toggle('hidden', !on); } };
   const cls = (id, c) => { const k = 'c_' + id; if (cache[k] !== c) { cache[k] = c; el[id].className = c; } };
 
   function init() {
-    ['sb', 'sb-a', 'sb-b', 'sb-sc', 'sb-q', 'sb-clk', 'sb-sh', 'sb-f', 'mystats', 'goals', 'hint', 'aimlbl', 'b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump',
-      'btn-rew', 'replay', 'skiprep', 'ftui', 'ft-t', 'ft-ring', 'ft-dot', 'ft-tip', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
+    ['sb', 'sb-a', 'sb-b', 'sb-sc', 'sb-q', 'sb-clk', 'sb-sh', 'sb-f', 'mystats', 'goals', 'hint', 'b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump',
+      'btn-rew', 'replay', 'skiprep', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
     const press = (id, fn) => el[id].addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); fn(e); });
-    press('b-shoot', (e) => Input.aimFromButton(e));
+    press('b-shoot', (e) => Input.shotFromButton(e));       // só levanta a bola: quem arremessa é o swipe
     press('b-pass', () => Match.act('pass')); press('b-drib', () => Match.act('dribble')); press('b-lay', () => Match.act('layup'));
     press('b-steal', () => Match.act('steal')); press('b-jump', () => Match.act('jump'));
     press('btn-rew', () => Match.rewind()); press('skiprep', () => Match.endReplay());
     press('btn-pause', () => UI.pauseMenu()); press('tr-quit', () => Game.quitTraining());
-    // lance livre: tocar/arrastar sobre a bola mira; soltar arremessa
-    el.ftui.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); if (!ft.on) return; ft.down = true; ftPoint(e); try { el.ftui.setPointerCapture(e.pointerId); } catch (x) { /* sem captura */ } });
-    el.ftui.addEventListener('pointermove', (e) => { if (ft.down) ftPoint(e); });
-    el.ftui.addEventListener('pointerup', ftRelease);
-    el.ftui.addEventListener('pointercancel', () => { ft.down = false; });
   }
 
   /* ----- avisos ----- */
@@ -2653,12 +3370,6 @@ const HUD = (() => {
     el.floats.appendChild(d); setTimeout(() => d.remove(), 1100);
   }
   function toast(msg) { el.toast.textContent = msg; el.toast.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.toast.classList.remove('on'), 2000); }
-  function aimLabel(on, x, y, pct, good, three) {
-    if (!on) { if (aimOn) { aimOn = false; el.aimlbl.classList.add('hidden'); } return; }
-    aimOn = true; const a = el.aimlbl;
-    a.className = 'out' + (good ? ' good' : ''); a.style.left = x + 'px'; a.style.top = y + 'px';
-    a.textContent = (good ? 'PERFEITO ' : '') + pct + '%' + (three ? ' ·3' : '');
-  }
   function replay(on) { vis('replay', on); vis('skiprep', on); }
   function period(q, sc) {
     const c = Match.cfg, tied = sc[0] === sc[1], s = Match.view().stats;
@@ -2675,52 +3386,16 @@ const HUD = (() => {
       <div class="row"><button class="btn d grow" data-a="watch">Assistir</button><button class="btn y grow" data-a="simEnd">Simular o fim</button></div>`, { noX: true });
   }
 
-  /* ----- lance livre: duas barras (mira e força) ----- */
-  function ftShow(on, i, n) {
-    if (!on) { if (ft.on) { ft.on = false; ft.down = false; vis('ftui', false); GFX.traj([]); } return; }
-    ft.on = true; ft.down = false; ft.t = Math.random() * 9; vis('ftui', true);
-    el['ft-t'].textContent = `LANCE LIVRE ${i}/${n}`;
-    el['ft-ring'].style.display = 'none'; el['ft-dot'].style.display = 'none';
-  }
-  const ftSrc = () => (Game.mode === 'match' ? Match.ftBall() : Train.ftBall());
-  // converte o toque em coordenadas da bola: (0,0) = centro, raio = 1, v positivo = para cima
-  function ftPoint(e) { const r = el.hud.getBoundingClientRect(); ft.u = (e.clientX - r.left - ft.cx) / ft.R; ft.v = -(e.clientY - r.top - ft.cy) / ft.R; }
-  function ftRelease(e) {
-    if (!ft.on || !ft.down) return; ft.down = false; ftPoint(e);
-    if (!ftSrc() || Math.hypot(ft.u, ft.v) > 1.1) return;                  // soltou fora da bola: cancela
-    const du = ft.u - ft.tx, dv = ft.v - ft.ty;
-    if (Game.mode === 'match') Match.ftInput(du, dv); else Train.ftInput(du, dv);
-  }
-  function ftUpdate(dt) {
-    if (!ft.on) return;
-    const b = ftSrc(), ring = el['ft-ring'], dot = el['ft-dot'];
-    if (!b) { ring.style.display = dot.style.display = 'none'; return; }
-    // o alvo verde passeia pela bola (mais devagar conforme o nível de treino)
-    ft.t += dt * Math.max(0.75, 1.25 - S.training.level * 0.025);
-    ft.tx = 0.42 * Math.sin(ft.t * 1.7); ft.ty = -0.08 + 0.36 * Math.sin(ft.t * 2.3 + 1);
-    const c = GFX.project(b.x, b.y, b.z), e = GFX.project(b.x + CT.BALL_R, b.y, b.z);
-    ft.cx = c.x; ft.cy = c.y; ft.R = Math.max(8, Math.abs(e.x - c.x));
-    ring.style.cssText = `display:block;left:${ft.cx + ft.tx * ft.R}px;top:${ft.cy - ft.ty * ft.R}px;width:${b.rz * 2 * ft.R}px;height:${b.rz * 2 * ft.R}px`;
-    const on = ft.down && Math.hypot(ft.u, ft.v) <= 1.1;
-    if (!on) { dot.style.display = 'none'; GFX.traj([]); set('ft-tip', 'Toque na bola em cima do alvo verde'); return; }
-    dot.style.cssText = `display:block;left:${ft.cx + ft.u * ft.R}px;top:${ft.cy - ft.v * ft.R}px`;
-    // prévia da trajetória para o ponto de contato atual (completa só com Linha de Mira / treino alto)
-    const v = ftVel(b.x, b.y, b.z, b.hx, b.hz, ft.u - ft.tx, ft.v - ft.ty, b.rz), pts = [], n = b.full ? 20 : 6;
-    for (let i = 2; i <= n + 1; i++) { const t = i * 0.045; pts.push([b.x + v.vx * t, b.y + v.vy * t - 0.5 * CT.G * t * t, b.z + v.vz * t, 0.32]); }
-    GFX.traj(pts); set('ft-tip', 'Solte para arremessar');
-  }
-
   /* ----- atualização por quadro ----- */
   const ORD = ['1º', '2º', '3º', '4º'];
   function show(kind) {                        // 'match' | 'train' | null
     el.hud.classList.toggle('hidden', !kind);
     for (const k in cache) delete cache[k];
-    ft.on = false;
     const m = kind === 'match';
     ['sb', 'mystats', 'goals', 'btn-pause'].forEach((id) => vis(id, m));
     vis('trainbar', kind === 'train');
-    ['b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump', 'btn-rew', 'replay', 'skiprep', 'ftui'].forEach((id) => vis(id, false));
-    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; GFX.setFov(46); el.banner.innerHTML = ''; aimLabel(false);
+    ['b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump', 'btn-rew', 'replay', 'skiprep'].forEach((id) => vis(id, false));
+    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; GFX.setFov(46); el.banner.innerHTML = '';
     if (m) {
       const c = Match.cfg;
       el['sb-a'].textContent = c.t0.short; el['sb-a'].style.background = U.hex(c.t0.c1);
@@ -2729,7 +3404,6 @@ const HUD = (() => {
     }
   }
   function update(dt) {
-    ftUpdate(dt);
     if (Game.mode === 'train') {
       const T = Train.state; set('tr-score', T.kind === 'cones' ? '🚧' : String(T.score)); set('tr-msg', `${Train.INFO[T.kind].name} · ${T.msg}`);
       vis('joyhint', T.kind === 'cones' && T.t < 1.5);
@@ -2748,17 +3422,18 @@ const HUD = (() => {
       const d = el.goals.children[i], t = `${g.short || g.txt} ${v.goals[i]}/${g.goal}`;
       if (d && d.textContent !== t) { d.textContent = t; d.className = v.goals[i] >= g.goal ? 'ok' : ''; }
     });
-    const m = v.replay || v.paused ? 'none' : v.mode;
-    vis('b-shoot', m === 'ball'); vis('b-drib', m === 'ball'); vis('b-lay', m === 'ball' && v.near);
+    // mirando (ou acompanhando o voo em 1ª pessoa): somem os botões; o arremesso é só pelo gesto
+    const m = v.replay || v.paused || v.aim || BallController.active ? 'none' : v.mode;
+    vis('b-shoot', m === 'ball'); vis('b-drib', m === 'ball'); vis('b-lay', m === 'ball' && v.dunk);
     vis('b-pass', m === 'ball' || m === 'off'); vis('b-steal', m === 'def'); vis('b-jump', m === 'def' || m === 'loose' || m === 'off');
     if (m === 'ball' || m === 'off') { cls('b-pass', 'act ' + (m === 'ball' ? 's2' : 'y s1')); set2('b-pass', m === 'ball' ? 'PASSAR' : 'PEDIR BOLA'); }
-    if (m === 'ball') { cls('b-drib', 'act s3' + (v.dead ? ' warn' : '')); set2('b-lay', v.dunk ? 'ENTERRAR' : 'BANDEJA'); }
+    if (m === 'ball') cls('b-drib', 'act s3' + (v.dead ? ' warn' : ''));
     if (m === 'def' || m === 'loose' || m === 'off') { cls('b-jump', 'act ' + (m === 'off' ? 's2' : 'y s1')); set2('b-jump', m === 'def' ? 'BLOQUEAR' : 'PULAR'); }
-    vis('btn-rew', v.rewind); set('hint', v.hint); if (ft.on) vis('joyhint', false);
+    vis('btn-rew', v.rewind); set('hint', v.hint); if (v.aim || BallController.active) vis('joyhint', false);
     if (!joyUsed && (Input.joy.x || Input.joy.y)) { joyUsed = true; vis('joyhint', false); }
   }
   const set2 = (id, v) => { const k = 's_' + id; if (cache[k] !== v) { cache[k] = v; el[id].lastElementChild.textContent = v; } };
-  return { init, banner, float, toast, aimLabel, replay, period, fouledOut, ftShow, show, update };
+  return { init, banner, float, toast, replay, period, fouledOut, show, update };
 })();
 
 /* ===================================================================== */
@@ -2869,7 +3544,7 @@ const UI = (() => {
       <div class="blk"><h3>🎁 Bônus diário</h3><div class="row"><p class="grow">Volte todo dia: 🪙 150 e ⚡ +2 de energia.</p><button class="btn y sm" data-a="login" ${d.login ? 'disabled' : ''}>${d.login ? 'Recebido' : 'Receber'}</button></div></div>
       <div class="blk"><h3>${ev.ic} ${ev.name} <small style="margin-left:auto;font-size:.7em;color:#fff">⏳ até 00:00</small></h3><p>${ev.desc}</p>
         <div class="row"><div class="grow">${bar(d.event.prog, ev.goal)}</div><button class="btn y sm" data-a="claimEvent" ${evOk && !d.event.done ? '' : 'disabled'}>${d.event.done ? 'Recebido' : rewardTxt(ev)}</button></div></div>
-      <div class="blk"><h3>🚧 Treino · Nível ${tr.level}</h3><p>Treinar melhora a precisão dos arremessos, a zona verde do lance livre e a velocidade. Níveis altos atraem a Seleção.</p>
+      <div class="blk"><h3>🚧 Treino · Nível ${tr.level}</h3><p>Treinar melhora a precisão dos arremessos (mais assistência de mira) e a velocidade. Níveis altos atraem a Seleção.</p>
         ${bar(tr.xp, trainNeed(tr.level), tr.level >= 20 ? 'MÁXIMO' : `${tr.xp}/${trainNeed(tr.level)} XP`)}
         <div class="center mt mint">Treinos restantes nesta rodada: ${S.trainLeft}/${maxTrain()}</div>
         ${Object.keys(Train.INFO).map((k) => { const i = Train.INFO[k]; return `<div class="item mt"><span class="ic2">${i.ic}</span><div class="grow"><h4>${i.name}</h4><small>${i.desc}</small></div><button class="btn d sm" data-a="trainInfo:${k}">Ver</button><button class="btn y sm" data-a="train:${k}">Jogar</button></div>`; }).join('')}
@@ -2937,17 +3612,29 @@ const UI = (() => {
     const st = S.settings, tg = (k, lbl) => `<div class="item"><div class="grow"><h4>${lbl}</h4></div><button class="btn ${st[k] ? 'g' : 'd'} sm" data-a="toggle:${k}">${st[k] ? 'LIGADO' : 'DESLIGADO'}</button></div>`;
     modal('AJUSTES', tg('sound', '🔊 Sons') + tg('music', '🎵 Música do menu') + tg('shadows', '🌤️ Sombras (desligue se travar)') +
       `<div class="item"><div class="grow"><h4>⏱️ Duração do quarto</h4><small>Vale para a próxima partida.</small></div>${[60, 120, 180].map((q) => `<button class="btn ${st.qlen === q ? 'y' : 'd'} sm" data-a="qlen:${q}">${q / 60} min</button>`).join('')}</div>
+      <div class="row"><button class="btn grow" data-a="${inMatch ? 'tuneM' : 'tune'}">🎚️ Ajustar arremesso</button></div>
       <div class="row"><button class="btn grow" data-a="howto">❓ Como jogar</button>${inMatch ? '' : '<button class="btn r sm" data-a="reset">Apagar progresso</button>'}</div>`, { onClose: inMatch ? () => pauseMenu() : null });
+  }
+  // "Inspector" do arremesso por gesto: controles deslizantes para as variáveis de ARREMESSO (ficam salvos no aparelho)
+  const tuneVal = (k) => { const st = ARREMESSO_CONTROLES.find((c) => c[0] === k)[4]; return ARREMESSO[k].toFixed(st < 0.1 ? 2 : 1); };
+  function tuneModal(inMatch) {
+    modal('AJUSTAR ARREMESSO', `<p class="txt center">Mexa e teste. Os valores ficam salvos neste aparelho.</p>` + ARREMESSO_CONTROLES.map(([k, lbl, mn, mx, stp]) =>
+      `<div class="tune"><label><span>${lbl}</span><b id="tv-${k}">${tuneVal(k)}</b></label><input type="range" data-tune="${k}" min="${mn}" max="${mx}" step="${stp}" value="${ARREMESSO[k]}"></div>`).join('') +
+      `<p class="txt"><b>Assistência de mira:</b> 0 = só o seu gesto; 1 = o jogo corrige o arco e a direção por completo. <b>Tolerância da força:</b> quanto maior, mais larga a zona amarela da seta.</p>
+      <div class="row"><button class="btn d grow" data-a="tuneReset:${inMatch ? 1 : 0}">Restaurar padrão</button><button class="btn y grow" data-a="close">PRONTO</button></div>`, { onClose: () => settingsModal(inMatch) });
   }
   function howtoModal() {
     modal('COMO JOGAR', `<div class="txt">
       <p>🕹️ <b>Mover:</b> arraste o dedo na parte de baixo/esquerda da tela (PC: WASD ou setas).</p>
-      <p>🏀 <b>Arremessar:</b> segure o botão amarelo (ou o seu jogador) e <b>arraste para trás</b>. A seta mostra a força: solte perto de <b>100%</b> e mantenha a seta reta. O arco pontilhado mostra a trajetória. (PC: segure Espaço.)</p>
+      <p>🏀 <b>Arremessar:</b> toque em ARREMESSAR (ou no seu jogador) para levantar a bola: a visão passa para os seus olhos. <b>Segure a bola e deslize o dedo para cima</b>, em direção à cesta, e solte no meio do movimento. Quanto mais longo e rápido o empurrão, mais força. (PC: Espaço levanta a bola; arraste com o mouse.)</p>
+      <p>➡️ <b>Seta de força:</b> aparece enquanto você empurra a bola e aponta para onde ela vai. <b style="color:#49e04b">Verde</b> = fraca, <b>amarela</b> = ideal, <b style="color:#ff4d3c">vermelha</b> = forte demais. Empurrar torto manda a bola para o lado. Arrastar para baixo não arremessa: a bola cai e volta.</p>
+      <p>⭕ <b>Círculo no aro:</b> ele abre e fecha sem parar. Solte a bola com o <b>círculo pequeno</b> para mais precisão: BOA!, ÓTIMO! ou EXCELENTE!</p>
+      <p>🌀 <b>Curva:</b> gire a bola em círculos antes de lançar. Ela brilha, faz uma curva no ar e a cesta vale bônus.</p>
       <p>🤝 <b>Passar:</b> toque no companheiro ou use PASSAR (a linha pontilhada mostra o alvo). Sem a bola, PEDIR BOLA chama o passe. (PC: E)</p>
       <p>⚡ <b>Driblar:</b> arranque para desequilibrar o marcador. Se você segurar a bola (finta de arremesso), não pode driblar de novo: é <b>drible duplo</b>; e andar com ela é <b>andada</b>. (PC: Q)</p>
-      <p>💥 <b>Enterrar/Bandeja:</b> aparece perto da cesta. (PC: F)</p>
+      <p>💥 <b>Enterrar:</b> o botão aparece bem perto da cesta. (PC: F)</p>
       <p>🛡️ <b>Defesa:</b> marque o jogador do anel vermelho. ROUBAR perto da bola; BLOQUEAR no tempo do arremesso. Errar o tempo pode dar falta — com 5 você é eliminado.</p>
-      <p>🎯 <b>Lance livre:</b> a bola aparece grande na sua frente. Toque nela <b>em cima do alvo verde</b> que se move: tocar à esquerda manda a bola para a direita, tocar embaixo dá mais força. Segure o dedo para ver a prévia e solte para arremessar.</p>
+      <p>🎯 <b>Lance livre:</b> é o mesmo gesto do arremesso, sem marcação. Você tem 15 segundos para cada lance.</p>
       <p>📏 <b>Regras:</b> 24s de posse (14 após rebote de ataque), 8s para passar do meio, sem volta de quadra, 3s no garrafão, bônus de lances livres após 4 faltas coletivas no quarto, prorrogação em caso de empate.</p></div>
       <button class="btn y big" data-a="close">ENTENDI!</button>`, { onClose: () => { if (!S.tutorial) { S.tutorial = true; saveGame(); } if (Game.mode === 'match' && Match.state.paused) pauseMenu(); } });
   }
@@ -3057,6 +3744,8 @@ const UI = (() => {
     tab: (t) => show(t), close: () => closeModal(),
     tasks: tasksModal, objectives: objectivesModal, customize: customizeModal, howto: howtoModal, standings: standingsModal, calendar: calendarModal,
     leaders: (k) => leadersModal(k), settings: () => settingsModal(false), settingsM: () => settingsModal(true),
+    tune: () => { onClose = null; tuneModal(false); }, tuneM: () => { onClose = null; tuneModal(true); },
+    tuneReset: (m) => { S.settings.arremesso = {}; aplicarAjustesArremesso(); saveGame(); onClose = null; tuneModal(m === '1'); },
     pre: (k) => openPre(k), back: () => show('home'), boosts: boostsModal, go,
     seasonEnd, nextPeriod: () => { closeModal(); Match.nextPeriod(); },
     resume: () => { closeModal(); Match.pause(false); },
@@ -3102,6 +3791,13 @@ const UI = (() => {
     });
     document.querySelectorAll('.nav').forEach((b) => b.addEventListener('click', () => { SND.play('click'); show(b.dataset.tab); }));
     $('#m-x').addEventListener('click', () => { SND.play('click'); closeModal(); });
+    // controles deslizantes de "Ajustar arremesso"
+    $('#modal').addEventListener('input', (e) => {
+      const k = e.target.dataset && e.target.dataset.tune; if (!k) return;
+      if (!S.settings.arremesso) S.settings.arremesso = {};
+      S.settings.arremesso[k] = +e.target.value; aplicarAjustesArremesso(); saveGame();
+      const b = $('#tv-' + k); if (b) b.textContent = tuneVal(k);
+    });
     $('#t-set').addEventListener('click', () => { SND.play('click'); settingsModal(false); });
     setInterval(() => { if (Game.mode === 'menu' && !PRE) refreshTop(); }, 5000);
   }
@@ -3133,8 +3829,8 @@ const Game = (() => {
   }
   const matchHandler = {
     origin: () => (Match.canAim() ? Match.userScreen() : null),
-    aimStart: () => Match.aimStart(), aimMove: (p, d) => Match.aimMove(p, d), aimEnd: (c) => Match.aimEnd(c),
-    aiming: () => Match.state.aim.on, tap: (x, y) => Match.tapPass(x, y),
+    shotStart: () => Match.aimStart(), shotCancel: () => Match.aimCancel(),   // levantar a bola / desistir (o arremesso é sempre pelo swipe)
+    tap: (x, y) => Match.tapPass(x, y),
     key: (k) => { const m = Match.view().mode; Match.act(k === 'q' ? (m === 'ball' ? 'dribble' : 'steal') : k); },
   };
   function startMatch(cfg, k) {
@@ -3160,12 +3856,13 @@ const Game = (() => {
     const dt = Math.min(0.05, (t - last) / 1000 || 0.016); last = t;
     if (!started) return;
     Input.update(dt);
+    BallController.update(dt);                          // bola do arremesso por gesto (tempo real)
     if (mode === 'match') {
       Match.update(dt); Match.sync(dt);
       if (endT && t > endT && Game._res) { const r = Game._res; Game._res = null; endT = 0; UI.closeModal(); HUD.show(null); Input.setHandler(null); UI.result(r, kind); }
     } else if (mode === 'train') Train.update(dt);
     else {
-      if (stageKind === 'none') return;                 // painel opaco por cima: não precisa renderizar
+      if (stageKind === 'none') { ShotFeedback.update(dt); return; }   // painel opaco por cima: não precisa renderizar
       models.forEach((m, i) => GFX.animate(m, stageKind === 'pre' ? 'hips' : 'idle', 0, dt));
       const k = 1 - Math.exp(-dt * 6);
       GFX.setFov(46);
@@ -3173,7 +3870,7 @@ const Game = (() => {
       else if (stageKind === 'custom') GFX.cam(0, 1.7, 7.4, 0, -0.75, 0, k);
       else GFX.cam(0, 1.5, 5.6, 0, 0.92, 0, k);
     }
-    HUD.update(dt); GFX.update(dt); GFX.render();
+    HUD.update(dt); ShotFeedback.update(dt); GFX.update(dt); GFX.render();
   }
 
   function fit() { const w = $('#stage').getBoundingClientRect().width; document.documentElement.style.setProperty('--sw', w + 'px'); if (started) GFX.resize(); }
@@ -3184,7 +3881,7 @@ const Game = (() => {
     }
     loadGame(); fit(); window.addEventListener('resize', fit);
     GFX.init($('#gl')); GFX.setShadows(S.settings.shadows);
-    Input.init($('#touch')); HUD.init(); UI.init();
+    Input.init($('#touch')); HUD.init(); ShotFeedback.init(); UI.init();
     started = true; fit();
     GFX.cam(0, 1.55, 5.3, 0, 0.98, 0, 1);
     $('#splash').addEventListener('click', () => {
@@ -3201,7 +3898,7 @@ const Game = (() => {
 })();
 
 // ganchos de depuração/testes (console): CUBOLA.Match.simulate({...})
-window.CUBOLA = { Game, Match, Train, UI, HUD, GFX, get save() { return S; }, TEAMS };
+window.CUBOLA = { Game, Match, Train, UI, HUD, GFX, InputSwipe, BallController, ThrowCalculator, ShotFeedback, ARREMESSO, get save() { return S; }, TEAMS };
 Game.boot();
 
 </script>

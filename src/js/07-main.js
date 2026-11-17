@@ -23,8 +23,8 @@ const Game = (() => {
   }
   const matchHandler = {
     origin: () => (Match.canAim() ? Match.userScreen() : null),
-    aimStart: () => Match.aimStart(), aimMove: (p, d) => Match.aimMove(p, d), aimEnd: (c) => Match.aimEnd(c),
-    aiming: () => Match.state.aim.on, tap: (x, y) => Match.tapPass(x, y),
+    shotStart: () => Match.aimStart(), shotCancel: () => Match.aimCancel(),   // levantar a bola / desistir (o arremesso é sempre pelo swipe)
+    tap: (x, y) => Match.tapPass(x, y),
     key: (k) => { const m = Match.view().mode; Match.act(k === 'q' ? (m === 'ball' ? 'dribble' : 'steal') : k); },
   };
   function startMatch(cfg, k) {
@@ -50,12 +50,13 @@ const Game = (() => {
     const dt = Math.min(0.05, (t - last) / 1000 || 0.016); last = t;
     if (!started) return;
     Input.update(dt);
+    BallController.update(dt);                          // bola do arremesso por gesto (tempo real)
     if (mode === 'match') {
       Match.update(dt); Match.sync(dt);
       if (endT && t > endT && Game._res) { const r = Game._res; Game._res = null; endT = 0; UI.closeModal(); HUD.show(null); Input.setHandler(null); UI.result(r, kind); }
     } else if (mode === 'train') Train.update(dt);
     else {
-      if (stageKind === 'none') return;                 // painel opaco por cima: não precisa renderizar
+      if (stageKind === 'none') { ShotFeedback.update(dt); return; }   // painel opaco por cima: não precisa renderizar
       models.forEach((m, i) => GFX.animate(m, stageKind === 'pre' ? 'hips' : 'idle', 0, dt));
       const k = 1 - Math.exp(-dt * 6);
       GFX.setFov(46);
@@ -63,7 +64,7 @@ const Game = (() => {
       else if (stageKind === 'custom') GFX.cam(0, 1.7, 7.4, 0, -0.75, 0, k);
       else GFX.cam(0, 1.5, 5.6, 0, 0.92, 0, k);
     }
-    HUD.update(dt); GFX.update(dt); GFX.render();
+    HUD.update(dt); ShotFeedback.update(dt); GFX.update(dt); GFX.render();
   }
 
   function fit() { const w = $('#stage').getBoundingClientRect().width; document.documentElement.style.setProperty('--sw', w + 'px'); if (started) GFX.resize(); }
@@ -74,7 +75,7 @@ const Game = (() => {
     }
     loadGame(); fit(); window.addEventListener('resize', fit);
     GFX.init($('#gl')); GFX.setShadows(S.settings.shadows);
-    Input.init($('#touch')); HUD.init(); UI.init();
+    Input.init($('#touch')); HUD.init(); ShotFeedback.init(); UI.init();
     started = true; fit();
     GFX.cam(0, 1.55, 5.3, 0, 0.98, 0, 1);
     $('#splash').addEventListener('click', () => {
@@ -91,5 +92,5 @@ const Game = (() => {
 })();
 
 // ganchos de depuração/testes (console): CUBOLA.Match.simulate({...})
-window.CUBOLA = { Game, Match, Train, UI, HUD, GFX, get save() { return S; }, TEAMS };
+window.CUBOLA = { Game, Match, Train, UI, HUD, GFX, InputSwipe, BallController, ThrowCalculator, ShotFeedback, ARREMESSO, get save() { return S; }, TEAMS };
 Game.boot();

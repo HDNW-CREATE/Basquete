@@ -66,6 +66,14 @@ const SND = (() => {
     win: (v) => { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone('square', f, f, 0.2, 0.12 * v, i * 0.13)); },
     lose: (v) => { [392, 349, 311, 262].forEach((f, i) => tone('triangle', f, f, 0.3, 0.2 * v, i * 0.2)); },
     error: (v) => { tone('sawtooth', 200, 120, 0.2, 0.15 * v); },
+    // arremesso por gesto: pegar a bola, lançar, bola girando (curva), bola fraca e precisão do círculo
+    grab: (v) => { tone('sine', 420, 640, 0.06, 0.12 * v); },
+    whoosh: (v) => { noise(700, 2600, 0.2, 0.3 * v, 1.4); },
+    spin: (v) => { tone('sawtooth', 300, 900, 0.22, 0.05 * v); noise(2500, 5000, 0.2, 0.08 * v, 3); },
+    drop: (v) => { tone('sine', 300, 140, 0.18, 0.2 * v); },
+    nice: (v) => { [784, 988].forEach((f, i) => tone('triangle', f, f, 0.14, 0.2 * v, i * 0.07)); },
+    great: (v) => { [784, 988, 1175].forEach((f, i) => tone('triangle', f, f, 0.15, 0.2 * v, i * 0.07)); },
+    excellent: (v) => { [784, 988, 1175, 1568].forEach((f, i) => tone('triangle', f, f, 0.18, 0.22 * v, i * 0.07)); tone('square', 2093, 2093, 0.25, 0.05 * v, 0.28); },
     levelup: (v) => { [523, 784, 1047, 1568].forEach((f, i) => tone('triangle', f, f, 0.22, 0.2 * v, i * 0.09)); },
   };
   function play(name, vol = 1) { if (on() && FX[name]) FX[name](vol); }

@@ -1,31 +1,26 @@
 /* =====================================================================
    Arquivo 06: interface HTML
-   - HUD: placar, relógios, botões de ação, avisos animados, lance livre
+   - HUD: placar, relógios, botões de ação, avisos animados
+     (a interface do arremesso por gesto fica no ShotFeedback)
    - UI: menus do modo carreira (início, loja, partidas, eventos, estilo
      de vida), pré-jogo, resultado e janelas (modais)
    ===================================================================== */
 const HUD = (() => {
   const $ = U.$, el = {}, cache = {};
-  let toastT = 0, aimOn = false, joyUsed = false;
-  const ft = { on: false, t: 0, down: false, u: 0, v: 0, cx: 0, cy: 0, R: 1, tx: 0, ty: 0 };
+  let toastT = 0, joyUsed = false;
   const set = (id, v) => { if (cache[id] !== v) { cache[id] = v; el[id].textContent = v; } };
   const vis = (id, on) => { const k = 'v_' + id; if (cache[k] !== on) { cache[k] = on; el[id].classList.toggle('hidden', !on); } };
   const cls = (id, c) => { const k = 'c_' + id; if (cache[k] !== c) { cache[k] = c; el[id].className = c; } };
 
   function init() {
-    ['sb', 'sb-a', 'sb-b', 'sb-sc', 'sb-q', 'sb-clk', 'sb-sh', 'sb-f', 'mystats', 'goals', 'hint', 'aimlbl', 'b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump',
-      'btn-rew', 'replay', 'skiprep', 'ftui', 'ft-t', 'ft-ring', 'ft-dot', 'ft-tip', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
+    ['sb', 'sb-a', 'sb-b', 'sb-sc', 'sb-q', 'sb-clk', 'sb-sh', 'sb-f', 'mystats', 'goals', 'hint', 'b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump',
+      'btn-rew', 'replay', 'skiprep', 'btn-pause', 'trainbar', 'tr-score', 'tr-msg', 'tr-quit', 'joyhint', 'banner', 'floats', 'toast', 'hud'].forEach((id) => { el[id] = $('#' + id); });
     const press = (id, fn) => el[id].addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); fn(e); });
-    press('b-shoot', (e) => Input.aimFromButton(e));
+    press('b-shoot', (e) => Input.shotFromButton(e));       // só levanta a bola: quem arremessa é o swipe
     press('b-pass', () => Match.act('pass')); press('b-drib', () => Match.act('dribble')); press('b-lay', () => Match.act('layup'));
     press('b-steal', () => Match.act('steal')); press('b-jump', () => Match.act('jump'));
     press('btn-rew', () => Match.rewind()); press('skiprep', () => Match.endReplay());
     press('btn-pause', () => UI.pauseMenu()); press('tr-quit', () => Game.quitTraining());
-    // lance livre: tocar/arrastar sobre a bola mira; soltar arremessa
-    el.ftui.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); SND.init(); if (!ft.on) return; ft.down = true; ftPoint(e); try { el.ftui.setPointerCapture(e.pointerId); } catch (x) { /* sem captura */ } });
-    el.ftui.addEventListener('pointermove', (e) => { if (ft.down) ftPoint(e); });
-    el.ftui.addEventListener('pointerup', ftRelease);
-    el.ftui.addEventListener('pointercancel', () => { ft.down = false; });
   }
 
   /* ----- avisos ----- */
@@ -39,12 +34,6 @@ const HUD = (() => {
     el.floats.appendChild(d); setTimeout(() => d.remove(), 1100);
   }
   function toast(msg) { el.toast.textContent = msg; el.toast.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.toast.classList.remove('on'), 2000); }
-  function aimLabel(on, x, y, pct, good, three) {
-    if (!on) { if (aimOn) { aimOn = false; el.aimlbl.classList.add('hidden'); } return; }
-    aimOn = true; const a = el.aimlbl;
-    a.className = 'out' + (good ? ' good' : ''); a.style.left = x + 'px'; a.style.top = y + 'px';
-    a.textContent = (good ? 'PERFEITO ' : '') + pct + '%' + (three ? ' ·3' : '');
-  }
   function replay(on) { vis('replay', on); vis('skiprep', on); }
   function period(q, sc) {
     const c = Match.cfg, tied = sc[0] === sc[1], s = Match.view().stats;
@@ -61,52 +50,16 @@ const HUD = (() => {
       <div class="row"><button class="btn d grow" data-a="watch">Assistir</button><button class="btn y grow" data-a="simEnd">Simular o fim</button></div>`, { noX: true });
   }
 
-  /* ----- lance livre: duas barras (mira e força) ----- */
-  function ftShow(on, i, n) {
-    if (!on) { if (ft.on) { ft.on = false; ft.down = false; vis('ftui', false); GFX.traj([]); } return; }
-    ft.on = true; ft.down = false; ft.t = Math.random() * 9; vis('ftui', true);
-    el['ft-t'].textContent = `LANCE LIVRE ${i}/${n}`;
-    el['ft-ring'].style.display = 'none'; el['ft-dot'].style.display = 'none';
-  }
-  const ftSrc = () => (Game.mode === 'match' ? Match.ftBall() : Train.ftBall());
-  // converte o toque em coordenadas da bola: (0,0) = centro, raio = 1, v positivo = para cima
-  function ftPoint(e) { const r = el.hud.getBoundingClientRect(); ft.u = (e.clientX - r.left - ft.cx) / ft.R; ft.v = -(e.clientY - r.top - ft.cy) / ft.R; }
-  function ftRelease(e) {
-    if (!ft.on || !ft.down) return; ft.down = false; ftPoint(e);
-    if (!ftSrc() || Math.hypot(ft.u, ft.v) > 1.1) return;                  // soltou fora da bola: cancela
-    const du = ft.u - ft.tx, dv = ft.v - ft.ty;
-    if (Game.mode === 'match') Match.ftInput(du, dv); else Train.ftInput(du, dv);
-  }
-  function ftUpdate(dt) {
-    if (!ft.on) return;
-    const b = ftSrc(), ring = el['ft-ring'], dot = el['ft-dot'];
-    if (!b) { ring.style.display = dot.style.display = 'none'; return; }
-    // o alvo verde passeia pela bola (mais devagar conforme o nível de treino)
-    ft.t += dt * Math.max(0.75, 1.25 - S.training.level * 0.025);
-    ft.tx = 0.42 * Math.sin(ft.t * 1.7); ft.ty = -0.08 + 0.36 * Math.sin(ft.t * 2.3 + 1);
-    const c = GFX.project(b.x, b.y, b.z), e = GFX.project(b.x + CT.BALL_R, b.y, b.z);
-    ft.cx = c.x; ft.cy = c.y; ft.R = Math.max(8, Math.abs(e.x - c.x));
-    ring.style.cssText = `display:block;left:${ft.cx + ft.tx * ft.R}px;top:${ft.cy - ft.ty * ft.R}px;width:${b.rz * 2 * ft.R}px;height:${b.rz * 2 * ft.R}px`;
-    const on = ft.down && Math.hypot(ft.u, ft.v) <= 1.1;
-    if (!on) { dot.style.display = 'none'; GFX.traj([]); set('ft-tip', 'Toque na bola em cima do alvo verde'); return; }
-    dot.style.cssText = `display:block;left:${ft.cx + ft.u * ft.R}px;top:${ft.cy - ft.v * ft.R}px`;
-    // prévia da trajetória para o ponto de contato atual (completa só com Linha de Mira / treino alto)
-    const v = ftVel(b.x, b.y, b.z, b.hx, b.hz, ft.u - ft.tx, ft.v - ft.ty, b.rz), pts = [], n = b.full ? 20 : 6;
-    for (let i = 2; i <= n + 1; i++) { const t = i * 0.045; pts.push([b.x + v.vx * t, b.y + v.vy * t - 0.5 * CT.G * t * t, b.z + v.vz * t, 0.32]); }
-    GFX.traj(pts); set('ft-tip', 'Solte para arremessar');
-  }
-
   /* ----- atualização por quadro ----- */
   const ORD = ['1º', '2º', '3º', '4º'];
   function show(kind) {                        // 'match' | 'train' | null
     el.hud.classList.toggle('hidden', !kind);
     for (const k in cache) delete cache[k];
-    ft.on = false;
     const m = kind === 'match';
     ['sb', 'mystats', 'goals', 'btn-pause'].forEach((id) => vis(id, m));
     vis('trainbar', kind === 'train');
-    ['b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump', 'btn-rew', 'replay', 'skiprep', 'ftui'].forEach((id) => vis(id, false));
-    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; GFX.setFov(46); el.banner.innerHTML = ''; aimLabel(false);
+    ['b-shoot', 'b-pass', 'b-drib', 'b-lay', 'b-steal', 'b-jump', 'btn-rew', 'replay', 'skiprep'].forEach((id) => vis(id, false));
+    vis('joyhint', m && !joyUsed); el.hint.textContent = ''; GFX.setFov(46); el.banner.innerHTML = '';
     if (m) {
       const c = Match.cfg;
       el['sb-a'].textContent = c.t0.short; el['sb-a'].style.background = U.hex(c.t0.c1);
@@ -115,7 +68,6 @@ const HUD = (() => {
     }
   }
   function update(dt) {
-    ftUpdate(dt);
     if (Game.mode === 'train') {
       const T = Train.state; set('tr-score', T.kind === 'cones' ? '🚧' : String(T.score)); set('tr-msg', `${Train.INFO[T.kind].name} · ${T.msg}`);
       vis('joyhint', T.kind === 'cones' && T.t < 1.5);
@@ -134,17 +86,18 @@ const HUD = (() => {
       const d = el.goals.children[i], t = `${g.short || g.txt} ${v.goals[i]}/${g.goal}`;
       if (d && d.textContent !== t) { d.textContent = t; d.className = v.goals[i] >= g.goal ? 'ok' : ''; }
     });
-    const m = v.replay || v.paused ? 'none' : v.mode;
-    vis('b-shoot', m === 'ball'); vis('b-drib', m === 'ball'); vis('b-lay', m === 'ball' && v.near);
+    // mirando (ou acompanhando o voo em 1ª pessoa): somem os botões; o arremesso é só pelo gesto
+    const m = v.replay || v.paused || v.aim || BallController.active ? 'none' : v.mode;
+    vis('b-shoot', m === 'ball'); vis('b-drib', m === 'ball'); vis('b-lay', m === 'ball' && v.dunk);
     vis('b-pass', m === 'ball' || m === 'off'); vis('b-steal', m === 'def'); vis('b-jump', m === 'def' || m === 'loose' || m === 'off');
     if (m === 'ball' || m === 'off') { cls('b-pass', 'act ' + (m === 'ball' ? 's2' : 'y s1')); set2('b-pass', m === 'ball' ? 'PASSAR' : 'PEDIR BOLA'); }
-    if (m === 'ball') { cls('b-drib', 'act s3' + (v.dead ? ' warn' : '')); set2('b-lay', v.dunk ? 'ENTERRAR' : 'BANDEJA'); }
+    if (m === 'ball') cls('b-drib', 'act s3' + (v.dead ? ' warn' : ''));
     if (m === 'def' || m === 'loose' || m === 'off') { cls('b-jump', 'act ' + (m === 'off' ? 's2' : 'y s1')); set2('b-jump', m === 'def' ? 'BLOQUEAR' : 'PULAR'); }
-    vis('btn-rew', v.rewind); set('hint', v.hint); if (ft.on) vis('joyhint', false);
+    vis('btn-rew', v.rewind); set('hint', v.hint); if (v.aim || BallController.active) vis('joyhint', false);
     if (!joyUsed && (Input.joy.x || Input.joy.y)) { joyUsed = true; vis('joyhint', false); }
   }
   const set2 = (id, v) => { const k = 's_' + id; if (cache[k] !== v) { cache[k] = v; el[id].lastElementChild.textContent = v; } };
-  return { init, banner, float, toast, aimLabel, replay, period, fouledOut, ftShow, show, update };
+  return { init, banner, float, toast, replay, period, fouledOut, show, update };
 })();
 
 /* ===================================================================== */
@@ -255,7 +208,7 @@ const UI = (() => {
       <div class="blk"><h3>🎁 Bônus diário</h3><div class="row"><p class="grow">Volte todo dia: 🪙 150 e ⚡ +2 de energia.</p><button class="btn y sm" data-a="login" ${d.login ? 'disabled' : ''}>${d.login ? 'Recebido' : 'Receber'}</button></div></div>
       <div class="blk"><h3>${ev.ic} ${ev.name} <small style="margin-left:auto;font-size:.7em;color:#fff">⏳ até 00:00</small></h3><p>${ev.desc}</p>
         <div class="row"><div class="grow">${bar(d.event.prog, ev.goal)}</div><button class="btn y sm" data-a="claimEvent" ${evOk && !d.event.done ? '' : 'disabled'}>${d.event.done ? 'Recebido' : rewardTxt(ev)}</button></div></div>
-      <div class="blk"><h3>🚧 Treino · Nível ${tr.level}</h3><p>Treinar melhora a precisão dos arremessos, a zona verde do lance livre e a velocidade. Níveis altos atraem a Seleção.</p>
+      <div class="blk"><h3>🚧 Treino · Nível ${tr.level}</h3><p>Treinar melhora a precisão dos arremessos (mais assistência de mira) e a velocidade. Níveis altos atraem a Seleção.</p>
         ${bar(tr.xp, trainNeed(tr.level), tr.level >= 20 ? 'MÁXIMO' : `${tr.xp}/${trainNeed(tr.level)} XP`)}
         <div class="center mt mint">Treinos restantes nesta rodada: ${S.trainLeft}/${maxTrain()}</div>
         ${Object.keys(Train.INFO).map((k) => { const i = Train.INFO[k]; return `<div class="item mt"><span class="ic2">${i.ic}</span><div class="grow"><h4>${i.name}</h4><small>${i.desc}</small></div><button class="btn d sm" data-a="trainInfo:${k}">Ver</button><button class="btn y sm" data-a="train:${k}">Jogar</button></div>`; }).join('')}
@@ -323,17 +276,29 @@ const UI = (() => {
     const st = S.settings, tg = (k, lbl) => `<div class="item"><div class="grow"><h4>${lbl}</h4></div><button class="btn ${st[k] ? 'g' : 'd'} sm" data-a="toggle:${k}">${st[k] ? 'LIGADO' : 'DESLIGADO'}</button></div>`;
     modal('AJUSTES', tg('sound', '🔊 Sons') + tg('music', '🎵 Música do menu') + tg('shadows', '🌤️ Sombras (desligue se travar)') +
       `<div class="item"><div class="grow"><h4>⏱️ Duração do quarto</h4><small>Vale para a próxima partida.</small></div>${[60, 120, 180].map((q) => `<button class="btn ${st.qlen === q ? 'y' : 'd'} sm" data-a="qlen:${q}">${q / 60} min</button>`).join('')}</div>
+      <div class="row"><button class="btn grow" data-a="${inMatch ? 'tuneM' : 'tune'}">🎚️ Ajustar arremesso</button></div>
       <div class="row"><button class="btn grow" data-a="howto">❓ Como jogar</button>${inMatch ? '' : '<button class="btn r sm" data-a="reset">Apagar progresso</button>'}</div>`, { onClose: inMatch ? () => pauseMenu() : null });
+  }
+  // "Inspector" do arremesso por gesto: controles deslizantes para as variáveis de ARREMESSO (ficam salvos no aparelho)
+  const tuneVal = (k) => { const st = ARREMESSO_CONTROLES.find((c) => c[0] === k)[4]; return ARREMESSO[k].toFixed(st < 0.1 ? 2 : 1); };
+  function tuneModal(inMatch) {
+    modal('AJUSTAR ARREMESSO', `<p class="txt center">Mexa e teste. Os valores ficam salvos neste aparelho.</p>` + ARREMESSO_CONTROLES.map(([k, lbl, mn, mx, stp]) =>
+      `<div class="tune"><label><span>${lbl}</span><b id="tv-${k}">${tuneVal(k)}</b></label><input type="range" data-tune="${k}" min="${mn}" max="${mx}" step="${stp}" value="${ARREMESSO[k]}"></div>`).join('') +
+      `<p class="txt"><b>Assistência de mira:</b> 0 = só o seu gesto; 1 = o jogo corrige o arco e a direção por completo. <b>Tolerância da força:</b> quanto maior, mais larga a zona amarela da seta.</p>
+      <div class="row"><button class="btn d grow" data-a="tuneReset:${inMatch ? 1 : 0}">Restaurar padrão</button><button class="btn y grow" data-a="close">PRONTO</button></div>`, { onClose: () => settingsModal(inMatch) });
   }
   function howtoModal() {
     modal('COMO JOGAR', `<div class="txt">
       <p>🕹️ <b>Mover:</b> arraste o dedo na parte de baixo/esquerda da tela (PC: WASD ou setas).</p>
-      <p>🏀 <b>Arremessar:</b> segure o botão amarelo (ou o seu jogador) e <b>arraste para trás</b>. A seta mostra a força: solte perto de <b>100%</b> e mantenha a seta reta. O arco pontilhado mostra a trajetória. (PC: segure Espaço.)</p>
+      <p>🏀 <b>Arremessar:</b> toque em ARREMESSAR (ou no seu jogador) para levantar a bola: a visão passa para os seus olhos. <b>Segure a bola e deslize o dedo para cima</b>, em direção à cesta, e solte no meio do movimento. Quanto mais longo e rápido o empurrão, mais força. (PC: Espaço levanta a bola; arraste com o mouse.)</p>
+      <p>➡️ <b>Seta de força:</b> aparece enquanto você empurra a bola e aponta para onde ela vai. <b style="color:#49e04b">Verde</b> = fraca, <b>amarela</b> = ideal, <b style="color:#ff4d3c">vermelha</b> = forte demais. Empurrar torto manda a bola para o lado. Arrastar para baixo não arremessa: a bola cai e volta.</p>
+      <p>⭕ <b>Círculo no aro:</b> ele abre e fecha sem parar. Solte a bola com o <b>círculo pequeno</b> para mais precisão: BOA!, ÓTIMO! ou EXCELENTE!</p>
+      <p>🌀 <b>Curva:</b> gire a bola em círculos antes de lançar. Ela brilha, faz uma curva no ar e a cesta vale bônus.</p>
       <p>🤝 <b>Passar:</b> toque no companheiro ou use PASSAR (a linha pontilhada mostra o alvo). Sem a bola, PEDIR BOLA chama o passe. (PC: E)</p>
       <p>⚡ <b>Driblar:</b> arranque para desequilibrar o marcador. Se você segurar a bola (finta de arremesso), não pode driblar de novo: é <b>drible duplo</b>; e andar com ela é <b>andada</b>. (PC: Q)</p>
-      <p>💥 <b>Enterrar/Bandeja:</b> aparece perto da cesta. (PC: F)</p>
+      <p>💥 <b>Enterrar:</b> o botão aparece bem perto da cesta. (PC: F)</p>
       <p>🛡️ <b>Defesa:</b> marque o jogador do anel vermelho. ROUBAR perto da bola; BLOQUEAR no tempo do arremesso. Errar o tempo pode dar falta — com 5 você é eliminado.</p>
-      <p>🎯 <b>Lance livre:</b> a bola aparece grande na sua frente. Toque nela <b>em cima do alvo verde</b> que se move: tocar à esquerda manda a bola para a direita, tocar embaixo dá mais força. Segure o dedo para ver a prévia e solte para arremessar.</p>
+      <p>🎯 <b>Lance livre:</b> é o mesmo gesto do arremesso, sem marcação. Você tem 15 segundos para cada lance.</p>
       <p>📏 <b>Regras:</b> 24s de posse (14 após rebote de ataque), 8s para passar do meio, sem volta de quadra, 3s no garrafão, bônus de lances livres após 4 faltas coletivas no quarto, prorrogação em caso de empate.</p></div>
       <button class="btn y big" data-a="close">ENTENDI!</button>`, { onClose: () => { if (!S.tutorial) { S.tutorial = true; saveGame(); } if (Game.mode === 'match' && Match.state.paused) pauseMenu(); } });
   }
@@ -443,6 +408,8 @@ const UI = (() => {
     tab: (t) => show(t), close: () => closeModal(),
     tasks: tasksModal, objectives: objectivesModal, customize: customizeModal, howto: howtoModal, standings: standingsModal, calendar: calendarModal,
     leaders: (k) => leadersModal(k), settings: () => settingsModal(false), settingsM: () => settingsModal(true),
+    tune: () => { onClose = null; tuneModal(false); }, tuneM: () => { onClose = null; tuneModal(true); },
+    tuneReset: (m) => { S.settings.arremesso = {}; aplicarAjustesArremesso(); saveGame(); onClose = null; tuneModal(m === '1'); },
     pre: (k) => openPre(k), back: () => show('home'), boosts: boostsModal, go,
     seasonEnd, nextPeriod: () => { closeModal(); Match.nextPeriod(); },
     resume: () => { closeModal(); Match.pause(false); },
@@ -488,6 +455,13 @@ const UI = (() => {
     });
     document.querySelectorAll('.nav').forEach((b) => b.addEventListener('click', () => { SND.play('click'); show(b.dataset.tab); }));
     $('#m-x').addEventListener('click', () => { SND.play('click'); closeModal(); });
+    // controles deslizantes de "Ajustar arremesso"
+    $('#modal').addEventListener('input', (e) => {
+      const k = e.target.dataset && e.target.dataset.tune; if (!k) return;
+      if (!S.settings.arremesso) S.settings.arremesso = {};
+      S.settings.arremesso[k] = +e.target.value; aplicarAjustesArremesso(); saveGame();
+      const b = $('#tv-' + k); if (b) b.textContent = tuneVal(k);
+    });
     $('#t-set').addEventListener('click', () => { SND.play('click'); settingsModal(false); });
     setInterval(() => { if (Game.mode === 'menu' && !PRE) refreshTop(); }, 5000);
   }

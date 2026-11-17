@@ -47,7 +47,6 @@
       <div id="trainbar" class="hidden"><b id="tr-score">0</b><span id="tr-msg"></span><button class="sq" id="tr-quit">✕</button></div>
       <div id="joyhint">Arraste aqui<br>para mover</div>
       <div id="hint" class="out"></div>
-      <div id="aimlbl" class="out hidden"></div>
       <button class="act y s1" id="b-shoot"><i>🏀</i>ARREMESSAR</button>
       <button class="act s2" id="b-pass"><i>🤝</i><span>PASSAR</span></button>
       <button class="act s3" id="b-drib"><i>⚡</i><span>DRIBLAR</span></button>
@@ -57,11 +56,18 @@
       <button class="btn g hidden" id="btn-rew">⏪ RETROCEDER</button>
       <div id="replay" class="hidden">● REPLAY</div>
       <button id="skiprep" class="hidden" aria-label="Pular replay"></button>
-      <div id="ftui" class="hidden">
-        <div class="t out" id="ft-t">LANCE LIVRE</div>
-        <div id="ft-ring"></div><div id="ft-dot"></div>
-        <div class="tip out" id="ft-tip">Toque na bola em cima do alvo verde</div>
+      <!-- arremesso por gesto (ShotFeedback): título, círculo-alvo no aro, seta de força e botões da mira -->
+      <div id="shotui" class="hidden">
+        <div class="out" id="sw-t"></div>
+        <div id="sw-ring" class="hidden"><div id="sw-in"></div></div>
+        <div id="sw-arrow" class="hidden"><div id="sw-track"></div><div id="sw-shaft"></div><div id="sw-head"></div></div>
+        <div id="sw-lbl" class="out hidden"></div>
+        <div id="sw-spin" class="out hidden"></div>
+        <div class="out" id="sw-tip"></div>
+        <button class="btn d sm hidden" id="sw-cancel">↩ VOLTAR</button>
+        <button class="btn sm hidden" id="sw-pass">🤝 PASSAR</button>
       </div>
+      <div id="sw-q" class="out"></div>
     </section>
 
     <section id="result" class="hidden"></section>
