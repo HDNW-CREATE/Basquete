@@ -53,3 +53,13 @@ node build.js
 ```
 
 Nomes, logo, times e marcas das placas são fictícios e criados para este jogo.
+
+## Bônus: mascotinho para o Claude Code 🦀
+
+A pasta [`mascotinho/`](mascotinho) é um plugin do Claude Code: um caranguejinho em pixel art que fica acima do
+campo de digitação, reage ao que o Claude faz (pensando, trabalhando, erro, pronto), ganha moedas por tokens e sobe
+de nível. São 8 modelos, entre eles o Basqueteiro e o Boleiro. Para instalar:
+
+```
+/plugin install mascotinho --marketplace hdnw-create/basquete
+```

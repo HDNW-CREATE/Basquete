@@ -1,0 +1,1 @@
+{ "name": "mascotinho", "version": "0.1.0", "license": "MIT", "description": "Um mascotinho em pixel art acima do campo de digitação: reage ao que o Claude faz, ganha moedas por tokens e sobe de nível.", "types": "./types/index.d.ts" }
