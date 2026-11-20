@@ -1,0 +1,14 @@
+{
+  "name": "basquete",
+  "description": "Plugins do Claude Code feitos neste repositório: o mascotinho em pixel art.",
+  "owner": {
+    "name": "hdnw-create"
+  },
+  "plugins": [
+    {
+      "name": "mascotinho",
+      "source": "./mascotinho",
+      "description": "Um mascotinho em pixel art acima do campo de digitação do Claude Code: reage ao que o Claude faz, ganha moedas por tokens e sobe de nível."
+    }
+  ]
+}
